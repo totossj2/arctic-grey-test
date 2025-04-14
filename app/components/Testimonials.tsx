@@ -112,7 +112,7 @@ export function Testimonials({
   const duplicatedLogos = [...mediaLogos, ...mediaLogos, ...mediaLogos];
   
   return (
-    <div className="w-full bg-gray-[#F6F6F5] border-y border-gray-100 py-3">
+    <div className="w-full bg-[#F6F6F5] border-y border-[#1B1F23]/10 py-3">
       <style dangerouslySetInnerHTML={{ __html: carouselStyles }} />
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:justify-between md:flex-row md:items-center">
