@@ -2,6 +2,8 @@ import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link, type MetaFunction} from '@remix-run/react';
 import {Suspense} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
+import {Hero} from '~/components/Hero';
+import {Testimonials} from '~/components/Testimonials';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
@@ -59,6 +61,8 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
+      <Hero />
+      <Testimonials />
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
@@ -77,11 +81,7 @@ function FeaturedCollection({
       className="featured-collection"
       to={`/collections/${collection.handle}`}
     >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
+
       <h1>{collection.title}</h1>
     </Link>
   );

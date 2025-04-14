@@ -79,7 +79,7 @@ export function Hero({
 
       {/* Hero Content */}
       <div className="relative flex items-center justify-start h-screen">
-        <div className="max-w-[55%] absolute bottom-40 left-0">
+        <div className="max-w-[60%] absolute bottom-40 left-0">
           <span className="text-white text-4xl md:text-9xl lg:text-[70px] font-bold max-w-3xl leading-tight tracking-tight">
             {title}
           </span>
