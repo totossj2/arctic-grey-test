@@ -9,6 +9,7 @@ import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
+import {Hero} from '~/components/Hero';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -45,6 +46,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
+      <Hero />
       <main>{children}</main>
       <Footer
         footer={footer}

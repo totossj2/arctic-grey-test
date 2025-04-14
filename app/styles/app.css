@@ -1,3 +1,6 @@
+@import url("reset.css");
+@import url("tailwind.css");
+
 :root {
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
@@ -11,6 +14,7 @@
 img {
   border-radius: 4px;
 }
+
 
 /*
 * --------------------------------------------------

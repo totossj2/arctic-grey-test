@@ -22,6 +22,20 @@ export default function Layout() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @font-face {
+              font-family: 'Rubik';
+              src: url('/fonts/Rubik/Rubik-VariableFont_wght.ttf') format('truetype');
+              font-weight: 300 700;
+              font-style: normal;
+            }
+            
+            body {
+              font-family: 'Rubik', sans-serif;
+            }
+          `
+        }} />
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
