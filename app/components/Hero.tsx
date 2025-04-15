@@ -61,7 +61,7 @@ export function Hero({
   title = "Great things never came from comfort zones.",
   ctaText = "Shop Now",
   ctaLink = "/shop",
-  videoSource = "app/assets/videos/hero_video.mp4",
+  videoSource = "/videos/hero_video.mp4",
   scrollingItems = defaultScrollingItems,
 }: HeroProps) {
   return (
