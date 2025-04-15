@@ -11,17 +11,17 @@ interface MediaLogo {
   name: string;
   imageSrc: string;
   altText?: string;
+  width: number;
+  height: number;
 }
 
 const defaultMediaLogos: MediaLogo[] = [
-  { name: 'Rolling Stone', imageSrc: '/images/logos/rolling-stone.png', altText: 'Rolling Stone logo' },
-  { name: 'Men\'s Journal', imageSrc: '/images/logos/mens-journal.png', altText: 'Men\'s Journal logo' },
-  { name: 'LA Weekly', imageSrc: '/images/logos/la-weekly.png', altText: 'LA Weekly logo' },
-  { name: 'Herb', imageSrc: '/images/logos/herb.png', altText: 'Herb logo' },
-  { name: 'New York Times', imageSrc: '/images/logos/nyt.png', altText: 'The New York Times logo' },
-  { name: 'BBC News', imageSrc: '/images/logos/bbc.png', altText: 'BBC News logo' },
-  { name: 'Rolling Stone', imageSrc: '/images/logos/rolling-stone.png', altText: 'Rolling Stone logo' },
-  { name: 'Men\'s Journal', imageSrc: '/images/logos/mens-journal.png', altText: 'Men\'s Journal logo' },
+  { name: 'Rolling Stone', imageSrc: '/images/logos/rolling-stone.png', altText: 'Rolling Stone logo', width: 79, height: 18 },
+  { name: 'Men\'s Journal', imageSrc: '/images/logos/mens-journal.png', altText: 'Men\'s Journal logo', width: 52, height: 16 },
+  { name: 'LA Weekly', imageSrc: '/images/logos/la-weekly.png', altText: 'LA Weekly logo', width: 58, height: 14 },
+  { name: 'Herb', imageSrc: '/images/logos/herb.png', altText: 'Herb logo', width: 37, height: 12 },
+  { name: 'New York Times', imageSrc: '/images/logos/nyt.png', altText: 'The New York Times logo', width: 81, height: 11 },
+  { name: 'BBC News', imageSrc: '/images/logos/bbc.png', altText: 'BBC News logo', width: 28, height: 18 },
 ];
 
 const StarIcon = () => (
@@ -51,7 +51,7 @@ const carouselStyles = `
   
   .logo-carousel-track {
     display: inline-block;
-    animation: scroll 55s linear infinite;
+    animation: scroll 85s linear infinite;
     will-change: transform;
   }
   
@@ -68,13 +68,12 @@ const carouselStyles = `
   .logo-card {
     background-color: white;
     width: 120px;
-    height: 60px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    padding: 0.5rem;
     transition: all 0.2s ease;
   }
   
@@ -92,7 +91,7 @@ const carouselStyles = `
   
   @media (max-width: 768px) {
     .logo-carousel-track {
-      animation: scroll 55s linear infinite;
+      animation: scroll 85s linear infinite;
     }
     
     .logo-card {
@@ -145,7 +144,11 @@ export function Testimonials({
                       <img 
                         src={logo.imageSrc} 
                         alt={logo.altText || logo.name} 
-                        className="max-h-[80%] max-w-[80%] object-contain grayscale hover:grayscale-0 transition-all"
+                        className="object-contain grayscale hover:grayscale-0 transition-all"
+                        style={{ 
+                          width: `${logo.width}px`, 
+                          height: `${logo.height}px` 
+                        }}
                         onError={(e) => {
                           // Si la imagen no se puede cargar, mostrar el nombre como texto
                           const target = e.target as HTMLImageElement;
