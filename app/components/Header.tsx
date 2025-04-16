@@ -36,10 +36,10 @@ export function Header({
   const {shop, menu} = header;
   return (
     <header className="rounded-[8px] mx-10 mt-6 bg-white/90 fixed top-0 left-0 right-0 z-50 py-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-8 md:px-8 lg:px-8 grid grid-cols-12">
+      <div className="items-center justify-between px-8 md:px-8 lg:px-8 grid grid-cols-12">
         {/* Logo */}
         <Link to="/" className="font-bold text-2xl tracking-tight col-span-4">
-          ARCTICGREY
+          UNCMFRT.COM
         </Link>
 
         {/* Desktop Navigation */}
