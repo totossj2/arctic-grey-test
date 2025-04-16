@@ -1,54 +1,105 @@
-// @ts-ignore -- virtual entry point for the app, resolved by Vite at build time
+// server.ts
 import * as remixBuild from 'virtual:remix/server-build';
-import type {Context} from '@netlify/edge-functions';
-import {
-  createHydrogenAppLoadContext,
-  createRequestHandler,
-} from '@netlify/remix-edge-adapter';
-import {storefrontRedirect} from '@shopify/hydrogen';
-import {createAppLoadContext} from '~/lib/context';
+import { storefrontRedirect } from '@shopify/hydrogen';
+import { createAppLoadContext } from '~/lib/context';
 
-export default async function (
-  request: Request,
-  netlifyContext: Context,
-): Promise<Response | undefined> {
-  try {
-    const appLoadContext = await createHydrogenAppLoadContext(
-      request,
-      netlifyContext,
-      createAppLoadContext,
-    );
-    const handleRequest = createRequestHandler({
-      build: remixBuild,
-      mode: process.env.NODE_ENV,
-    });
+const isProduction = process.env.NODE_ENV === 'production';
 
-    const response = await handleRequest(request, appLoadContext);
+let handler: any;
 
-    if (!response) {
-      return;
-    }
+if (isProduction) {
+  // Configuración para deploy (Netlify)
+  handler = async function (
+    request: Request,
+    netlifyContext: any
+  ): Promise<Response | undefined> {
+    try {
+      // Importación dinámica del adapter para deploy
+      const { createHydrogenAppLoadContext, createRequestHandler } =
+        await import('@netlify/remix-edge-adapter');
 
-    if (appLoadContext.session.isPending) {
-      response.headers.set('Set-Cookie', await appLoadContext.session.commit());
-    }
-
-    if (response.status === 404) {
-      /**
-       * Check for redirects only when there's a 404 from the app.
-       * If the redirect doesn't exist, then `storefrontRedirect`
-       * will pass through the 404 response.
-       */
-      return storefrontRedirect({
+      const appLoadContext = await createHydrogenAppLoadContext(
         request,
-        response,
-        storefront: appLoadContext.storefront,
-      });
-    }
+        netlifyContext,
+        createAppLoadContext
+      );
 
-    return response;
-  } catch (error) {
-    console.error(error);
-    return new Response('An unexpected error occurred', {status: 500});
-  }
+      const handleRequest = createRequestHandler({
+        build: remixBuild,
+        mode: process.env.NODE_ENV,
+      });
+
+      const response = await handleRequest(request, appLoadContext);
+
+      if (appLoadContext.session.isPending) {
+        response.headers.set(
+          'Set-Cookie',
+          await appLoadContext.session.commit()
+        );
+      }
+
+      if (response.status === 404) {
+        return storefrontRedirect({
+          request,
+          response,
+          storefront: appLoadContext.storefront,
+        });
+      }
+
+      return response;
+    } catch (error) {
+      console.error(error);
+      return new Response('An unexpected error occurred', { status: 500 });
+    }
+  };
+} else {
+  // Configuración para desarrollo (Remix-Oxygen)
+  handler = {
+    async fetch(
+      request: Request,
+      env: Env,
+      executionContext: ExecutionContext
+    ): Promise<Response> {
+      try {
+        // Importación dinámica del adapter para desarrollo
+        const { createRequestHandler } = await import('@shopify/remix-oxygen');
+
+        const appLoadContext = await createAppLoadContext(
+          request,
+          env,
+          executionContext
+        );
+
+        const handleRequest = createRequestHandler({
+          build: remixBuild,
+          mode: process.env.NODE_ENV,
+          getLoadContext: () => appLoadContext,
+        });
+
+        const response = await handleRequest(request);
+
+        if (appLoadContext.session.isPending) {
+          response.headers.set(
+            'Set-Cookie',
+            await appLoadContext.session.commit()
+          );
+        }
+
+        if (response.status === 404) {
+          return storefrontRedirect({
+            request,
+            response,
+            storefront: appLoadContext.storefront,
+          });
+        }
+
+        return response;
+      } catch (error) {
+        console.error(error);
+        return new Response('An unexpected error occurred', { status: 500 });
+      }
+    },
+  };
 }
+
+export default handler;

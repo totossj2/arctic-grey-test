@@ -1,34 +1,50 @@
+// context.ts
 import {
   createHydrogenContext,
-  type HydrogenContext,
   InMemoryCache,
+  type HydrogenContext,
 } from '@shopify/hydrogen';
-import {AppSession} from '~/lib/session';
-import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import { AppSession } from '~/lib/session';
+import { CART_QUERY_FRAGMENT } from '~/lib/fragments';
 
 /**
- * The context implementation is separate from server.ts
- * so that type can be extracted for AppLoadContext
+ * Crea el contexto de carga para la app.
  */
 export async function createAppLoadContext(
   request: Request,
   env: Env,
   executionContext: ExecutionContext,
 ): Promise<HydrogenContext> {
-  /**
-   * Open a cache instance in the worker and a custom session instance.
-   */
   if (!env?.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is not set');
   }
 
-  const session = await AppSession.init(request, [env.SESSION_SECRET]);
+  const isProduction = process.env.NODE_ENV === 'production';
+  let cache: any;
+  let waitUntil: ExecutionContext['waitUntil'];
+  let session: any;
+
+  if (isProduction) {
+    // Configuración para deploy
+    cache = new InMemoryCache();
+    waitUntil = executionContext.waitUntil;
+    session = await AppSession.init(request, [env.SESSION_SECRET]);
+  } else {
+    // Configuración para desarrollo
+    waitUntil = executionContext.waitUntil.bind(executionContext);
+    const [cacheFromWorker, sessionFromWorker] = await Promise.all([
+      caches.open('hydrogen'),
+      AppSession.init(request, [env.SESSION_SECRET]),
+    ]);
+    cache = cacheFromWorker;
+    session = sessionFromWorker;
+  }
 
   const hydrogenContext = createHydrogenContext({
     env,
     request,
-    cache: new InMemoryCache(),
-    waitUntil: executionContext.waitUntil,
+    cache,
+    waitUntil,
     session,
     i18n: {
       language: 'EN',
@@ -41,6 +57,6 @@ export async function createAppLoadContext(
 
   return {
     ...hydrogenContext,
-    // add your custom context here
+    // Agrega aquí cualquier otro dato al contexto
   };
 }
