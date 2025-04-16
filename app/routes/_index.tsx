@@ -8,6 +8,7 @@ import type { CollectionProductsQuery } from 'storefrontapi.generated';
 
 import Goals from '~/components/Goals';
 import RecommendedProducts, {COLLECTION_PRODUCTS_QUERY} from '~/components/RecommendedProducts';
+import InformativeItems from '~/components/InformativeItems';
 
 export const meta: MetaFunction = () => {
   return [{title: 'Hydrogen | Home'}];
@@ -33,6 +34,7 @@ export default function Homepage() {
       <Testimonials />
       <Goals />
       <RecommendedProducts products={products} />
+      <InformativeItems />
     </div>
   );
 }

@@ -14,7 +14,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     collection(id: $id) {
       title
-      products(first: 10) {
+      products(first: 8) {
         nodes {
           ...ProductCard
         }
