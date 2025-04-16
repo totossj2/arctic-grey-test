@@ -35,217 +35,250 @@ export default function VideoCarousel({
   viewAllLink = "#",
   itemsToShow = 5, // Debe ser impar para un centro claro
 }: VideoCarouselProps) {
+  // Normalizamos items para mostrar a un número impar
+  if (itemsToShow % 2 === 0) {
+    itemsToShow += 1;
+  }
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
-  // containerWidth ya no es necesario para el cálculo de tx, pero podría ser útil para el itemW
-  const [containerWidth, setContainerWidth] = useState<number | null>(null); 
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState(0); // -1: prev, 0: none, 1: next
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const gapPx = 16;
+  const [isReady, setIsReady] = useState(false); // Nuevo estado para controlar la visibilidad inicial
+  
+  // Calcular el ancho de cada item basado en el contenedor
+  const calculateItemWidth = () => {
+    if (!containerWidth) return 250;
+    return (containerWidth - (gapPx * (itemsToShow - 1))) / itemsToShow;
+  };
 
+  const itemWidth = calculateItemWidth();
+  const halfItemsCount = Math.floor(itemsToShow / 2);
+  
+  // Medir el ancho del contenedor
   useEffect(() => {
-    const el = carouselContainerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setContainerWidth(entry.contentRect.width);
+    const updateWidth = () => {
+      if (carouselRef.current) {
+        const width = carouselRef.current.clientWidth;
+        if (width > 0) { // Asegurarse de que tenemos un ancho válido
+          setContainerWidth(width);
+          setIsReady(true); // Marcar como listo una vez medido
+        }
+      }
+    };
+    
+    // Intentar medir inmediatamente y luego en resize
+    updateWidth(); 
+    window.addEventListener('resize', updateWidth);
+    
+    // Fallback por si la medición inicial falla (raro, pero seguro)
+    const timer = setTimeout(() => {
+      if (!isReady) {
+        updateWidth();
+      }
+    }, 100); 
+
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+      clearTimeout(timer);
+    };
+  }, [isReady]); // Depender de isReady previene bucles si la medición falla inicialmente
+
+  // Efectivamente manejamos el total de videos
+  const totalItems = videos.length;
+  
+  // Navegación con bloqueo durante animación
+  const handlePrev = () => {
+    if (isAnimating) return;
+    setDirection(-1);
+    setIsAnimating(true);
+    setActiveIndex((prev) => (prev - 1 + totalItems) % totalItems);
+    setTimeout(() => setIsAnimating(false), 500); // Coincidir con duración de la transición
+  };
+  
+  const handleNext = () => {
+    if (isAnimating) return;
+    setDirection(1);
+    setIsAnimating(true);
+    setActiveIndex((prev) => (prev + 1) % totalItems);
+    setTimeout(() => setIsAnimating(false), 500); // Coincidir con duración de la transición
+  };
+
+  // Auto-reproducir video central y pausar los demás
+  useEffect(() => {
+    const videoElements = carouselRef.current?.querySelectorAll('video') || [];
+    
+    videoElements.forEach((video, index) => {
+      const videoItem = video.closest('[data-video-index]');
+      if (!videoItem) return;
+      
+      const videoIndex = parseInt(videoItem.getAttribute('data-video-index') || '0', 10);
+      const virtualIndex = (videoIndex - activeIndex + totalItems) % totalItems;
+      const position = virtualIndex <= halfItemsCount 
+        ? virtualIndex 
+        : virtualIndex - totalItems;
+        
+      // Central = reproducir, resto = pausar
+      if (position === 0) {
+        // video.play().catch(() => {}); // Opcional: auto-reproducir
+      } else {
+        video.pause();
+      }
     });
-    ro.observe(el);
-    setContainerWidth(el.offsetWidth);
-    return () => ro.disconnect();
-  }, []); // No necesita depender de videos aquí
+  }, [activeIndex, totalItems, halfItemsCount]);
+
+  // Manejadores para video
+  const handleVideoMouseEnter = (e: React.MouseEvent<HTMLVideoElement>, videoIndex: number) => {
+    const virtualIndex = (videoIndex - activeIndex + totalItems) % totalItems;
+    const position = virtualIndex <= halfItemsCount 
+      ? virtualIndex 
+      : virtualIndex - totalItems;
+      
+    if (position === 0) {
+      e.currentTarget.play().catch(() => {});
+    }
+  };
+  
+  const handleVideoMouseLeave = (e: React.MouseEvent<HTMLVideoElement>) => {
+    e.currentTarget.pause();
+  };
 
   if (!videos || videos.length === 0) {
     return <div className="text-center py-10">No videos available.</div>;
   }
-  if (itemsToShow % 2 === 0) {
-    console.warn("itemsToShow should be an odd number for a clear center item. Adjusting...");
-    itemsToShow += 1;
-  }
-
-  const totalItems = videos.length;
-
-  const handlePrev = () => {
-    setActiveIndex((prevIndex) => (prevIndex - 1 + totalItems) % totalItems);
-  };
-  const handleNext = () => {
-    setActiveIndex((prevIndex) => (prevIndex + 1) % totalItems);
-  };
-
-  // Función para obtener los videos en el orden visual correcto
-  const getDisplayedVideos = () => {
-    const displayed = [];
-    const half = Math.floor(itemsToShow / 2);
-    // Calcular el índice inicial en el array original para el primer elemento visible
-    const startOriginalIndex = (activeIndex - half + totalItems) % totalItems;
-
-    for (let i = 0; i < itemsToShow; i++) {
-      const originalIndex = (startOriginalIndex + i + totalItems) % totalItems;
-       // Asegurarse de que solo añadimos si hay suficientes videos o duplicamos si es necesario (opcional, por ahora asumimos totalItems >= itemsToShow)
-      if (totalItems >= itemsToShow || i < totalItems) {
-        displayed.push(videos[originalIndex]);
-      } else {
-         // Placeholder o lógica para pocos items (ej. mostrar null o items vacíos)
-         // displayed.push(null); // Ejemplo
-         // Por simplicidad, asumimos que siempre hay suficientes videos
-         displayed.push(videos[originalIndex]);
-      }
-    }
-    // Si totalItems < itemsToShow, el array puede ser más corto.
-    // Podríamos rellenar con null o elementos vacíos si quisiéramos estrictamente itemsToShow espacios visuales.
-    return displayed;
-  };
-
-  const displayedVideos = getDisplayedVideos();
-  const centerDisplayIndex = Math.floor(itemsToShow / 2);
-
-  // Ancho base del item (podría ajustarse si el contenedor es muy pequeño)
-  const baseItemWidth = containerWidth !== null && itemsToShow > 0
-      ? (containerWidth / itemsToShow) - gapPx * ((itemsToShow -1) / itemsToShow) // Ajuste por gap promedio
-      : 250; // Un valor por defecto razonable
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLVideoElement>) => {
-    // La lógica de hover ahora depende del índice de display (si es el central)
-    const videoElement = e.currentTarget;
-    const parentDiv = videoElement.closest('[data-display-index]');
-    const displayIndex = parentDiv ? parseInt(parentDiv.getAttribute('data-display-index') || '-1', 10) : -1;
-
-    if (displayIndex === centerDisplayIndex) {
-        videoElement.play().catch(error => {
-            console.error("Video play failed:", error);
-        });
-    }
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLVideoElement>) => {
-    e.currentTarget.pause();
-  };
-
-  // Pausar videos no centrales cuando cambia activeIndex (o displayedVideos)
-  useEffect(() => {
-    const centralVideoId = displayedVideos[centerDisplayIndex]?.id;
-    carouselContainerRef.current?.querySelectorAll('video').forEach(video => {
-        const parentDiv = video.closest('[data-video-id]');
-        const videoId = parentDiv?.getAttribute('data-video-id');
-        if (videoId !== centralVideoId) {
-            video.pause();
-        }
-         // Opcional: Autoplay del video central al navegar (si se desea)
-         // else if (videoId === centralVideoId) {
-         //    video.play().catch(e => console.error("Autoplay failed", e));
-         // }
-    });
- // Dependencia clave: activeIndex o la recalculación de displayedVideos
- }, [activeIndex, videos]); // Re-ejecutar si cambia el índice activo o el array original
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#F7F7F7] overflow-x-hidden">
-      <div className="max-w-screen mx-auto"> {/* Añadido mx-auto */}
+    <section className="py-16 bg-[#F7F7F7] overflow-hidden">
+      <div className="">
         {/* Cabecera con título y botones */}
         <div className="flex flex-col items-center justify-center gap-4 mb-8">
           <div className="text-center flex flex-row items-center justify-center gap-16">
             <button
-              className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
-              onClick={handlePrev} aria-label="Previous videos"
+              className="p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              onClick={handlePrev}
+              disabled={isAnimating}
+              aria-label="Videos anteriores"
             >
               <ArrowLeftIcon />
             </button>
-            <div className='flex flex-col items-center justify-center'>
+            <div className="flex flex-col items-center justify-center">
               {subTitle && <div className="text-sm text-gray-600 mb-1">{subTitle}</div>}
               <h2 className="text-[40px] font-medium text-[#1B1F23] tracking-tight">{title}</h2>
             </div>
             <button
-              className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
-              onClick={handleNext} aria-label="Next videos"
+              className="p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              onClick={handleNext}
+              disabled={isAnimating}
+              aria-label="Videos siguientes"
             >
               <ArrowRightIcon />
             </button>
           </div>
-          {viewAllLink && <div className="text-center"><a href={viewAllLink} className="text-[16px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All</a></div>}
+          {viewAllLink && (
+            <div className="text-center">
+              <a href={viewAllLink} className="text-[16px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">
+                View All
+              </a>
+            </div>
+          )}
         </div>
 
-        {/* Contenedor del Carrusel */}
-        {/* Añadido perspective para posible 3D effect y flex para centrar */}
+        {/* Carrusel Principal */}
         <div 
-          ref={carouselContainerRef} 
-          className="w-full flex justify-center items-center" 
-          style={{ 
-            minHeight: '450px', // Altura mínima para dar espacio
-            perspective: '1000px' // Para efectos 3D si se añaden
-          }}
+          ref={carouselRef} 
+          className={`relative w-full h-[850px] flex items-center justify-center transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
         >
-          {/* Contenedor Interno: No necesita transform, usa flex gap */}
-          <div
-            className={`flex justify-center items-center transition-all duration-500 ease-in-out`}
-            style={{ gap: `${gapPx}px` }}
-          >
-            {/* Mapear sobre los videos a mostrar (array rotado) */}
-            {displayedVideos.map((videoItem, displayIndex) => {
-              // videoItem puede ser null si totalItems < itemsToShow y no rellenamos
-              if (!videoItem) return <div key={`placeholder-${displayIndex}`} style={{width: `${baseItemWidth}px`}}></div>; 
-
-              const isCenter = displayIndex === centerDisplayIndex;
-              const distanceFromCenter = Math.abs(displayIndex - centerDisplayIndex);
-
-              // Calcular escala y opacidad basado en la distancia al centro
-              let scale = 1;
-              let opacity = 1;
-              let zIndex = 0;
-              if (distanceFromCenter === 0) { // Centro
-                scale = 1.1; // Más grande
-                opacity = 1;
-                zIndex = 10;
-              } else if (distanceFromCenter === 1) { // Adyacentes
-                scale = 0.9; // Más pequeño
-                opacity = 0.7; // Semitransparente
-                zIndex = 5;
-              } else { // Más alejados
-                scale = 0.8; // Aún más pequeño
-                opacity = 0.5; // Más transparente
-                zIndex = 1;
-              }
-              // Opcional: Añadir un ligero desplazamiento Y para los no centrales
-              const translateY = distanceFromCenter > 0 ? '10px' : '0px';
-
-              return (
-                <div
-                  key={videoItem.id} // Usar ID original como key para React
-                  data-display-index={displayIndex} // Índice visual actual
-                  data-video-id={videoItem.id} // ID del video para pausar otros
-                  className={`flex-shrink-0 transition-all duration-500 ease-in-out`}
-                  style={{
-                    width: `${baseItemWidth}px`,
-                    transform: `scale(${scale}) translateY(${translateY})`,
-                    opacity: opacity,
-                    zIndex: zIndex,
-                     // marginRight no es necesario si usamos flex gap en el padre
-                  }}
-                >
-                  <a href={videoItem.productLink} className="block group cursor-pointer" target="_blank" rel="noopener noreferrer">
-                    {/* Contenedor con aspect ratio y sombra */}
-                    <div className={`aspect-w-9 aspect-h-16 mb-3 overflow-hidden rounded-md bg-gray-200 shadow-md transition-shadow ${isCenter ? 'shadow-xl' : ''}`}>
-                      <video
-                        src={videoItem.videoUrl}
-                        className="w-full h-full object-cover"
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                        poster=""
-                      />
-                    </div>
-                    {/* Texto solo visible en el centro */}
-                    <div className={`text-center px-1 transition-opacity duration-300 ${isCenter ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                      <h3 className="text-base font-semibold truncate" title={videoItem.title}>{videoItem.title}</h3>
-                      <p className="text-sm text-gray-600">{videoItem.price}</p>
-                    </div>
-                  </a>
-                </div>
-              );
-            })}
-          </div>
+          {/* Renderizamos los videos solo cuando esté listo */}
+          {isReady && (
+             <div className="relative w-full h-full flex items-center justify-center">
+               {videos.map((video, index) => {
+                 // Calcular la posición "virtual" basada en activeIndex
+                 const virtualIndex = (index - activeIndex + totalItems) % totalItems;
+                 
+                 // Transformar el índice virtual a posición (-2, -1, 0, 1, 2) donde 0 es el centro
+                 const position = virtualIndex <= halfItemsCount 
+                   ? virtualIndex 
+                   : virtualIndex - totalItems;
+                 
+                 // Determinar si este elemento debe mostrarse (está en el rango visible)
+                 const isVisible = Math.abs(position) <= halfItemsCount;
+                 
+                 if (!isVisible) return null;
+                 
+                 // Calcular estilos basados en la posición relativa al centro
+                 let zIndex;
+                 let maxHeight; // Valor absoluto, no porcentaje
+                 
+                 if (position === 0) { // Centro
+                   zIndex = 10;
+                   maxHeight = 850; // Altura máxima para el video activo (px)
+                 } else { // Todos los demás (adyacentes y lejanos)
+                   zIndex = position === -1 || position === 1 ? 5 : 1;
+                   maxHeight = 680; // Altura máxima menor para inactivos (70% del activo)
+                 }
+                 
+                 // Calcular desplazamiento horizontal basado en la posición
+                 const translateX = position * (itemWidth + gapPx);
+                 
+                 return (
+                   <div
+                     key={video.id}
+                     data-video-index={index}
+                     className="absolute transition-all duration-500 ease-out"
+                     style={{
+                       width: `${itemWidth}px`,
+                       transform: `translateX(${translateX}px)`,
+                       zIndex,
+                       willChange: 'transform',
+                     }}
+                   >
+                     <a
+                       href={video.productLink}
+                       className="block cursor-pointer"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                     >
+                       {/* Contenedor de video con altura fija y max-height variable */}
+                       <div 
+                         className={`relative overflow-hidden rounded-md bg-gray-200 shadow-md transition-all duration-500 ease-out ${position === 0 ? 'shadow-xl' : ''}`}
+                         style={{
+                           height: 900, // Altura fija para todos (misma que el max-height del activo)
+                           maxHeight: maxHeight, // Recorta según la posición
+                         }}
+                       >
+                         <video
+                           src={video.videoUrl}
+                           className="w-full h-full object-cover"
+                           style={{
+                             objectPosition: 'center top' // Anclar al borde superior
+                           }}
+                           muted
+                           loop
+                           playsInline
+                           preload="metadata"
+                           onMouseEnter={(e) => handleVideoMouseEnter(e, index)}
+                           onMouseLeave={handleVideoMouseLeave}
+                           poster=""
+                         />
+                       </div>
+                       <div 
+                         className={`text-center px-1 mt-2 transition-opacity duration-300 ${position === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                       >
+                         <h3 className="text-base font-semibold truncate" title={video.title}>
+                           {video.title}
+                         </h3>
+                         <p className="text-sm text-gray-600">{video.price}</p>
+                       </div>
+                     </a>
+                   </div>
+                 );
+               })}
+             </div>
+          )}
         </div>
       </div>
     </section>
   );
-} 
+}
