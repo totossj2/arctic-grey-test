@@ -27,12 +27,12 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
 // Placeholder Arrow SVG components
 const ArrowLeftIcon = () => (
   <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M5.40179 0.182292L0.6875 4.55729C0.5625 4.67882 0.5 4.82639 0.5 5C0.5 5.17361 0.5625 5.32118 0.6875 5.44271L5.40179 9.81771C5.72321 10.0608 6.02679 10.0608 6.3125 9.81771C6.5625 9.50521 6.5625 9.21007 6.3125 8.93229L2.75 5.625H11.8571C12.25 5.59028 12.4643 5.38194 12.5 5C12.4643 4.61806 12.25 4.40972 11.8571 4.375H2.75L6.3125 1.06771C6.5625 0.789931 6.5625 0.494792 6.3125 0.182292C6.02679 -0.0607639 5.72321 -0.0607639 5.40179 0.182292Z" fill="#1B1F23"/>
+    <path d="M5.40179 0.182292L0.6875 4.55729C0.5625 4.67882 0.5 4.82639 0.5 5C0.5 5.17361 0.5625 5.32118 0.6875 5.44271L5.40179 9.81771C5.72321 10.0608 6.02679 10.0608 6.3125 9.81771C6.5625 9.50521 6.5625 9.21007 6.3125 8.93229L2.75 5.625H11.8571C12.25 5.59028 12.4643 5.38194 12.5 5C12.4643 4.61806 12.25 4.40972 11.8571 4.375H2.75L6.3125 1.06771C6.5625 0.789931 6.5625 0.494792 6.3125 0.182292C6.02679 -0.0607639 5.72321 -0.0607639 5.40179 0.182292Z" fill="#1B1F23" />
   </svg>
 );
 const ArrowRightIcon = () => (
   <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M7.59821 0.182292L12.3125 4.55729C12.4375 4.67882 12.5 4.82639 12.5 5C12.5 5.17361 12.4375 5.32118 12.3125 5.44271L7.59821 9.81771C7.27679 10.0608 6.97321 10.0608 6.6875 9.81771C6.4375 9.50521 6.4375 9.21007 6.6875 8.93229L10.25 5.625H1.14286C0.75 5.59028 0.535714 5.38194 0.5 5C0.535714 4.61806 0.75 4.40972 1.14286 4.375H10.25L6.6875 1.06771C6.4375 0.789931 6.4375 0.494792 6.6875 0.182292C6.97321 -0.0607639 7.27679 -0.0607639 7.59821 0.182292Z" fill="#1B1F23"/>
+    <path d="M7.59821 0.182292L12.3125 4.55729C12.4375 4.67882 12.5 4.82639 12.5 5C12.5 5.17361 12.4375 5.32118 12.3125 5.44271L7.59821 9.81771C7.27679 10.0608 6.97321 10.0608 6.6875 9.81771C6.4375 9.50521 6.4375 9.21007 6.6875 8.93229L10.25 5.625H1.14286C0.75 5.59028 0.535714 5.38194 0.5 5C0.535714 4.61806 0.75 4.40972 1.14286 4.375H10.25L6.6875 1.06771C6.4375 0.789931 6.4375 0.494792 6.6875 0.182292C6.97321 -0.0607639 7.27679 -0.0607639 7.59821 0.182292Z" fill="#1B1F23" />
   </svg>
 );
 
@@ -54,7 +54,7 @@ export default function RecommendedProducts({ products }: Props) {
               console.log('Await response:', response);
 
               // Temporary: Cast response to any to access title
-              const collectionTitle = (response as any)?.collection?.title || "Products"; 
+              const collectionTitle = (response as any)?.collection?.title || "Products";
               const allProducts = (response as any)?.collection?.products?.nodes || [];
 
               const [startIndex, setStartIndex] = useState(0);
@@ -115,19 +115,19 @@ export default function RecommendedProducts({ products }: Props) {
                         <ArrowRightIcon />
                       </button>
                     </div>
-                    <div className="text-center"><a href={`/collections/${collectionTitle}`} className="text-[16px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All</a></div>                    
+                    <div className="text-center"><a href={`/collections/${collectionTitle}`} className="text-[16px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All</a></div>
                   </div>
 
                   {/* Carousel Container - Always rendered for measurement */}
                   <div ref={carouselContainerRef} className="overflow-hidden w-full">
-                    {/* Inner Sliding Container - Initially hidden, fades in */} 
+                    {/* Inner Sliding Container - Initially hidden, fades in */}
                     <div
                       className={`flex transition-transform duration-300 ease-in-out opacity-0 transition-opacity ${containerWidth !== null ? 'opacity-100' : ''}`}
-                      style={{ 
-                        gap: `${gapPx}px`, 
+                      style={{
+                        gap: `${gapPx}px`,
                         transform: `translateX(-${tx}px)`,
                         // Add min-height matching placeholder to prevent layout shift if needed
-                        minHeight: containerWidth === null ? '500px' : undefined 
+                        minHeight: containerWidth === null ? '500px' : undefined
                       }}
                     >
                       {/* Render cards only if width is calculated to avoid incorrect initial styles */}
@@ -135,7 +135,6 @@ export default function RecommendedProducts({ products }: Props) {
                         <ProductCard
                           key={product.id}
                           product={product}
-                          tags={productTags[idx] || []}
                           style={{ width: `${itemW}px`, flexShrink: 0 }}
                         />
                       ))}

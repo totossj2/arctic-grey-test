@@ -99,26 +99,28 @@ export default function RecommendedProducts({ products }: Props) {
                                 <>
                                     {/* Header and Buttons */}
                                     <div className="flex flex-row items-center justify-between mb-8 w-full">
-                                        <div className="text-center flex flex-row items-center justify-start ">
-                                            <div className="text-start">
-                                                <p className="text-base text-[#1B1F23] ">
-                                                    <span role="img" aria-label="thinking face" >📦</span> Goals Specific
-                                                </p>
-                                                <h2 className="mt-2 text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
-                                                    Bundles
-                                                </h2>
+                                        <div className="text-center flex flex-row items-center gap-32 ">
+                                            <div className="text-center flex flex-row items-center justify-start ">
+                                                <div className="text-start">
+                                                    <p className="text-base text-[#1B1F23] ">
+                                                        <span role="img" aria-label="thinking face" >📦</span> Goals Specific
+                                                    </p>
+                                                    <h2 className="mt-2 text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
+                                                        Bundles
+                                                    </h2>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className='flex flex-row items-center justify-center gap-4 text-[#1B1F23] text-[14px]'>
-                                            {categories.map((category) => (
-                                                <li
-                                                    key={category}
-                                                    className={`list-none cursor-pointer ${selectedCategory === category ? 'underline underline-offset-10 decoration-1' : ''}`}
-                                                    onClick={() => setSelectedCategory(category)}
-                                                >
-                                                    {category}
-                                                </li>
-                                            ))}
+                                            <div className='flex flex-row items-center justify-center gap-12 text-[#1B1F23] text-[14px]'>
+                                                {categories.map((category) => (
+                                                    <li
+                                                        key={category}
+                                                        className={`list-none cursor-pointer ${selectedCategory === category ? 'underline underline-offset-10 decoration-1' : ''}`}
+                                                        onClick={() => setSelectedCategory(category)}
+                                                    >
+                                                        {category}
+                                                    </li>
+                                                ))}
+                                            </div>
                                         </div>
                                         <div className="flex flex-row items-center justify-end gap-4">
                                             <div className="text-center">
@@ -155,8 +157,8 @@ export default function RecommendedProducts({ products }: Props) {
                                                 <ProductCard
                                                     key={product.id}
                                                     product={product}
-                                                    tags={[]}
                                                     style={{ width: `${itemW}px`, flexShrink: 0 }}
+                                                    version='bundle'
                                                 />
                                             ))}
                                         </div>
