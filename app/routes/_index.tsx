@@ -10,6 +10,7 @@ import Goals from '~/components/Goals';
 import RecommendedProducts, { COLLECTION_PRODUCTS_QUERY } from '~/components/RecommendedProducts';
 import InformativeItems from '~/components/InformativeItems';
 import VideoCarousel from '~/components/VideoCarousel';
+import Bundles from '~/components/Bundles';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
@@ -25,6 +26,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
   return json({ products: data });
 }
+
 
 export default function Homepage() {
   const { products } = useLoaderData<typeof loader>();
@@ -81,6 +83,7 @@ export default function Homepage() {
       <RecommendedProducts products={products} />
       <InformativeItems />
       <VideoCarousel videos={videos} />
+      <Bundles products={products} />
     </div>
   );
 }
