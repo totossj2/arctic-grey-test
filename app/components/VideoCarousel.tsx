@@ -3,12 +3,12 @@ import { useState, useRef, useEffect } from 'react';
 // SVGs de flechas (iguales a RecommendedProducts.tsx)
 const ArrowLeftIcon = () => (
   <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M5.40179 0.182292L0.6875 4.55729C0.5625 4.67882 0.5 4.82639 0.5 5C0.5 5.17361 0.5625 5.32118 0.6875 5.44271L5.40179 9.81771C5.72321 10.0608 6.02679 10.0608 6.3125 9.81771C6.5625 9.50521 6.5625 9.21007 6.3125 8.93229L2.75 5.625H11.8571C12.25 5.59028 12.4643 5.38194 12.5 5C12.4643 4.61806 12.25 4.40972 11.8571 4.375H2.75L6.3125 1.06771C6.5625 0.789931 6.5625 0.494792 6.3125 0.182292C6.02679 -0.0607639 5.72321 -0.0607639 5.40179 0.182292Z" fill="#1B1F23"/>
+    <path d="M5.40179 0.182292L0.6875 4.55729C0.5625 4.67882 0.5 4.82639 0.5 5C0.5 5.17361 0.5625 5.32118 0.6875 5.44271L5.40179 9.81771C5.72321 10.0608 6.02679 10.0608 6.3125 9.81771C6.5625 9.50521 6.5625 9.21007 6.3125 8.93229L2.75 5.625H11.8571C12.25 5.59028 12.4643 5.38194 12.5 5C12.4643 4.61806 12.25 4.40972 11.8571 4.375H2.75L6.3125 1.06771C6.5625 0.789931 6.5625 0.494792 6.3125 0.182292C6.02679 -0.0607639 5.72321 -0.0607639 5.40179 0.182292Z" fill="#1B1F23" />
   </svg>
 );
 const ArrowRightIcon = () => (
   <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M7.59821 0.182292L12.3125 4.55729C12.4375 4.67882 12.5 4.82639 12.5 5C12.5 5.17361 12.4375 5.32118 12.3125 5.44271L7.59821 9.81771C7.27679 10.0608 6.97321 10.0608 6.6875 9.81771C6.4375 9.50521 6.4375 9.21007 6.6875 8.93229L10.25 5.625H1.14286C0.75 5.59028 0.535714 5.38194 0.5 5C0.535714 4.61806 0.75 4.40972 1.14286 4.375H10.25L6.6875 1.06771C6.4375 0.789931 6.4375 0.494792 6.6875 0.182292C6.97321 -0.0607639 7.27679 -0.0607639 7.59821 0.182292Z" fill="#1B1F23"/>
+    <path d="M7.59821 0.182292L12.3125 4.55729C12.4375 4.67882 12.5 4.82639 12.5 5C12.5 5.17361 12.4375 5.32118 12.3125 5.44271L7.59821 9.81771C7.27679 10.0608 6.97321 10.0608 6.6875 9.81771C6.4375 9.50521 6.4375 9.21007 6.6875 8.93229L10.25 5.625H1.14286C0.75 5.59028 0.535714 5.38194 0.5 5C0.535714 4.61806 0.75 4.40972 1.14286 4.375H10.25L6.6875 1.06771C6.4375 0.789931 6.4375 0.494792 6.6875 0.182292C6.97321 -0.0607639 7.27679 -0.0607639 7.59821 0.182292Z" fill="#1B1F23" />
   </svg>
 );
 
@@ -18,6 +18,7 @@ interface VideoItem {
   productLink: string; // Link para la página del producto asociado
   title: string;
   price: string;
+  productImage: string; // Imagen del producto
 }
 
 interface VideoCarouselProps {
@@ -47,16 +48,19 @@ export default function VideoCarousel({
   const [containerWidth, setContainerWidth] = useState(0);
   const gapPx = 16;
   const [isReady, setIsReady] = useState(false); // Nuevo estado para controlar la visibilidad inicial
-  
+
   // Calcular el ancho de cada item basado en el contenedor
   const calculateItemWidth = () => {
-    if (!containerWidth) return 250;
-    return (containerWidth - (gapPx * (itemsToShow - 1))) / itemsToShow;
+    // Hardcoded width to 300px
+    return 300;
+    // Original calculation:
+    // if (!containerWidth) return 250;
+    // return (containerWidth - (gapPx * (itemsToShow - 1))) / itemsToShow;
   };
 
   const itemWidth = calculateItemWidth();
   const halfItemsCount = Math.floor(itemsToShow / 2);
-  
+
   // Medir el ancho del contenedor
   useEffect(() => {
     const updateWidth = () => {
@@ -68,17 +72,17 @@ export default function VideoCarousel({
         }
       }
     };
-    
+
     // Intentar medir inmediatamente y luego en resize
-    updateWidth(); 
+    updateWidth();
     window.addEventListener('resize', updateWidth);
-    
+
     // Fallback por si la medición inicial falla (raro, pero seguro)
     const timer = setTimeout(() => {
       if (!isReady) {
         updateWidth();
       }
-    }, 100); 
+    }, 100);
 
     return () => {
       window.removeEventListener('resize', updateWidth);
@@ -88,7 +92,7 @@ export default function VideoCarousel({
 
   // Efectivamente manejamos el total de videos
   const totalItems = videos.length;
-  
+
   // Navegación con bloqueo durante animación
   const handlePrev = () => {
     if (isAnimating) return;
@@ -97,7 +101,7 @@ export default function VideoCarousel({
     setActiveIndex((prev) => (prev - 1 + totalItems) % totalItems);
     setTimeout(() => setIsAnimating(false), 500); // Coincidir con duración de la transición
   };
-  
+
   const handleNext = () => {
     if (isAnimating) return;
     setDirection(1);
@@ -109,17 +113,17 @@ export default function VideoCarousel({
   // Auto-reproducir video central y pausar los demás
   useEffect(() => {
     const videoElements = carouselRef.current?.querySelectorAll('video') || [];
-    
+
     videoElements.forEach((video, index) => {
       const videoItem = video.closest('[data-video-index]');
       if (!videoItem) return;
-      
+
       const videoIndex = parseInt(videoItem.getAttribute('data-video-index') || '0', 10);
       const virtualIndex = (videoIndex - activeIndex + totalItems) % totalItems;
-      const position = virtualIndex <= halfItemsCount 
-        ? virtualIndex 
+      const position = virtualIndex <= halfItemsCount
+        ? virtualIndex
         : virtualIndex - totalItems;
-        
+
       // Central = reproducir, resto = pausar
       if (position === 0) {
         // video.play().catch(() => {}); // Opcional: auto-reproducir
@@ -132,15 +136,15 @@ export default function VideoCarousel({
   // Manejadores para video
   const handleVideoMouseEnter = (e: React.MouseEvent<HTMLVideoElement>, videoIndex: number) => {
     const virtualIndex = (videoIndex - activeIndex + totalItems) % totalItems;
-    const position = virtualIndex <= halfItemsCount 
-      ? virtualIndex 
+    const position = virtualIndex <= halfItemsCount
+      ? virtualIndex
       : virtualIndex - totalItems;
-      
+
     if (position === 0) {
-      e.currentTarget.play().catch(() => {});
+      e.currentTarget.play().catch(() => { });
     }
   };
-  
+
   const handleVideoMouseLeave = (e: React.MouseEvent<HTMLVideoElement>) => {
     e.currentTarget.pause();
   };
@@ -186,96 +190,111 @@ export default function VideoCarousel({
         </div>
 
         {/* Carrusel Principal */}
-        <div 
-          ref={carouselRef} 
-          className={`relative w-full h-[850px] flex items-center justify-center transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
+        <div
+          ref={carouselRef}
+          className={`relative w-full h-[650px] flex items-center justify-center transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Renderizamos los videos solo cuando esté listo */}
           {isReady && (
-             <div className="relative w-full h-full flex items-center justify-center">
-               {videos.map((video, index) => {
-                 // Calcular la posición "virtual" basada en activeIndex
-                 const virtualIndex = (index - activeIndex + totalItems) % totalItems;
-                 
-                 // Transformar el índice virtual a posición (-2, -1, 0, 1, 2) donde 0 es el centro
-                 const position = virtualIndex <= halfItemsCount 
-                   ? virtualIndex 
-                   : virtualIndex - totalItems;
-                 
-                 // Determinar si este elemento debe mostrarse (está en el rango visible)
-                 const isVisible = Math.abs(position) <= halfItemsCount;
-                 
-                 if (!isVisible) return null;
-                 
-                 // Calcular estilos basados en la posición relativa al centro
-                 let zIndex;
-                 let maxHeight; // Valor absoluto, no porcentaje
-                 
-                 if (position === 0) { // Centro
-                   zIndex = 10;
-                   maxHeight = 850; // Altura máxima para el video activo (px)
-                 } else { // Todos los demás (adyacentes y lejanos)
-                   zIndex = position === -1 || position === 1 ? 5 : 1;
-                   maxHeight = 680; // Altura máxima menor para inactivos (70% del activo)
-                 }
-                 
-                 // Calcular desplazamiento horizontal basado en la posición
-                 const translateX = position * (itemWidth + gapPx);
-                 
-                 return (
-                   <div
-                     key={video.id}
-                     data-video-index={index}
-                     className="absolute transition-all duration-500 ease-out"
-                     style={{
-                       width: `${itemWidth}px`,
-                       transform: `translateX(${translateX}px)`,
-                       zIndex,
-                       willChange: 'transform',
-                     }}
-                   >
-                     <a
-                       href={video.productLink}
-                       className="block cursor-pointer"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                     >
-                       {/* Contenedor de video con altura fija y max-height variable */}
-                       <div 
-                         className={`relative overflow-hidden rounded-md bg-gray-200 shadow-md transition-all duration-500 ease-out ${position === 0 ? 'shadow-xl' : ''}`}
-                         style={{
-                           height: 900, // Altura fija para todos (misma que el max-height del activo)
-                           maxHeight: maxHeight, // Recorta según la posición
-                         }}
-                       >
-                         <video
-                           src={video.videoUrl}
-                           className="w-full h-full object-cover"
-                           style={{
-                             objectPosition: 'center top' // Anclar al borde superior
-                           }}
-                           muted
-                           loop
-                           playsInline
-                           preload="metadata"
-                           onMouseEnter={(e) => handleVideoMouseEnter(e, index)}
-                           onMouseLeave={handleVideoMouseLeave}
-                           poster=""
-                         />
-                       </div>
-                       <div 
-                         className={`text-center px-1 mt-2 transition-opacity duration-300 ${position === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                       >
-                         <h3 className="text-base font-semibold truncate" title={video.title}>
-                           {video.title}
-                         </h3>
-                         <p className="text-sm text-gray-600">{video.price}</p>
-                       </div>
-                     </a>
-                   </div>
-                 );
-               })}
-             </div>
+            <div className="relative w-full h-full flex items-center justify-center">
+              {videos.map((video, index) => {
+                // Calcular la posición "virtual" basada en activeIndex
+                const virtualIndex = (index - activeIndex + totalItems) % totalItems;
+
+                // Transformar el índice virtual a posición (-2, -1, 0, 1, 2) donde 0 es el centro
+                const position = virtualIndex <= halfItemsCount
+                  ? virtualIndex
+                  : virtualIndex - totalItems;
+
+                // Determinar si este elemento debe mostrarse (está en el rango visible)
+                const isVisible = Math.abs(position) <= halfItemsCount;
+
+                if (!isVisible) return null;
+
+                // Calcular estilos basados en la posición relativa al centro
+                let zIndex;
+                let maxHeight; // Valor absoluto, no porcentaje
+
+                if (position === 0) { // Centro
+                  zIndex = 10;
+                  maxHeight = 500; // Altura máxima para el video activo (px)
+                } else { // Todos los demás (adyacentes y lejanos)
+                  zIndex = position === -1 || position === 1 ? 5 : 1;
+                  maxHeight = 420; // Altura máxima menor para inactivos (70% del activo)
+                }
+
+                // Calcular desplazamiento horizontal basado en la posición
+                const translateX = position * (itemWidth + gapPx);
+
+                return (
+                  <div
+                    key={video.id}
+                    data-video-index={index}
+                    className="absolute transition-all duration-500 ease-out"
+                    style={{
+                      width: `${itemWidth}px`,
+                      transform: `translateX(${translateX}px)`,
+                      zIndex,
+                      willChange: 'transform',
+                    }}
+                  >
+                    <a
+                      href={video.productLink}
+                      className="block cursor-pointer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {/* Contenedor de video con altura fija y max-height variable */}
+                      <div
+                        className={`relative overflow-hidden rounded-md bg-gray-200 shadow-md transition-all duration-500 ease-out ${position === 0 ? 'shadow-xl' : ''}`}
+                        style={{
+                          height: 500, // Altura fija para todos (misma que el max-height del activo)
+                          maxHeight: maxHeight, // Recorta según la posición
+                        }}
+                      >
+                        <video
+                          src={video.videoUrl}
+                          className="w-full h-full object-cover"
+                          style={{
+                            objectPosition: 'center top' // Anclar al borde superior
+                          }}
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                          onMouseEnter={(e) => handleVideoMouseEnter(e, index)}
+                          onMouseLeave={handleVideoMouseLeave}
+                          poster=""
+                        />
+                      </div>
+                      <div
+                        className='flex flex-row justify-center items-center text-center bg-white gap-3 px-1 mt-2 h-[80px] rounded-[8px] w-full transition-opacity duration-300 opacity-100'
+                      >
+                        <div className='w-16 h-16 rounded-[8px] bg-[#F6F6F5]'>
+                          <img src={video.productImage} alt={video.title} className="w-full h-auto p-2" />
+                        </div>
+                        <div className='text-[#1B1F23] text-start flex gap-1 flex-col'>
+                          <span className='text-[13px] '>
+                            {video.title}
+                          </span>
+                          <span className='font-medium  text-[12px]'>
+                            {video.price}
+                          </span>
+                        </div>
+
+                        <div className='rounded-full bg-[#1B1F23] flex items-center justify-center w-8 h-8 ml-auto'>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.3125 7.75C13.276 8.15104 13.0573 8.36979 12.6562 8.40625H8.28125V12.7812C8.24479 13.1823 8.02604 13.401 7.625 13.4375C7.22396 13.401 7.00521 13.1823 6.96875 12.7812V8.40625H2.59375C2.19271 8.36979 1.97396 8.15104 1.9375 7.75C1.97396 7.34896 2.19271 7.13021 2.59375 7.09375H6.96875V2.71875C7.00521 2.31771 7.22396 2.09896 7.625 2.0625C8.02604 2.09896 8.24479 2.31771 8.28125 2.71875V7.09375H12.6562C13.0573 7.13021 13.276 7.34896 13.3125 7.75Z" fill="white" />
+                          </svg>
+                        </div>
+
+
+                      </div>
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
