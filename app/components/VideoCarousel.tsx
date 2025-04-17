@@ -73,6 +73,7 @@ export default function VideoCarousel({
     itemsToShow += 1;
   }
 
+  // Initial state ensures video starts playing and muted
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState(0); // -1: prev, 0: none, 1: next
@@ -80,9 +81,9 @@ export default function VideoCarousel({
   const [containerWidth, setContainerWidth] = useState(0);
   const gapPx = 16;
   const [isReady, setIsReady] = useState(false); // Nuevo estado para controlar la visibilidad inicial
-  const [isMuted, setIsMuted] = useState(true); // State for mute status
+  const [isMuted, setIsMuted] = useState(true); // Default: true (muted)
   const [showVolumeButton, setShowVolumeButton] = useState(false); // State to show volume button on hover
-  const [isPlaying, setIsPlaying] = useState(true); // State for play/pause status of the center video
+  const [isPlaying, setIsPlaying] = useState(true); // Default: true (playing)
   const [showPlayPauseButton, setShowPlayPauseButton] = useState(false); // State to show play/pause button
 
   // Calcular el ancho de cada item basado en el contenedor
@@ -124,7 +125,7 @@ export default function VideoCarousel({
       window.removeEventListener('resize', updateWidth);
       clearTimeout(timer);
     };
-  }, [isReady]); // Depender de isReady previene bucles si la medición falla inicialmente
+  }, []); // Changed dependency array from [isReady] to [] to run correctly on mount
 
   // Efectivamente manejamos el total de videos
   const totalItems = videos.length;
@@ -169,6 +170,9 @@ export default function VideoCarousel({
 
   // Auto-reproducir video central y pausar los demás, respecting isPlaying state
   useEffect(() => {
+    // Ensure videos are rendered before trying to control them
+    if (!isReady) return;
+
     const videoElements = carouselRef.current?.querySelectorAll('video') || [];
 
     videoElements.forEach((video) => { // Removed index as it's not directly used here
@@ -184,9 +188,17 @@ export default function VideoCarousel({
       // Central = reproducir/pausar, resto = pausar
       if (position === 0) {
         if (isPlaying) {
-          video.play().catch((error) => {
-            // console.warn("Autoplay/play failed:", error);
-          });
+          // Attempt to play and handle potential browser restrictions
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              // Autoplay was prevented. This is common in browsers.
+              // You might want to show a play button or log this.
+              // console.warn("Autoplay prevented:", error);
+              // Optionally set isPlaying to false if autoplay fails
+              // setIsPlaying(false); 
+            });
+          }
         } else {
           video.pause();
         }
@@ -200,7 +212,7 @@ export default function VideoCarousel({
     // Show play/pause button only for the center video when not animating
     setShowPlayPauseButton(!isAnimating);
 
-  }, [activeIndex, totalItems, halfItemsCount, isMuted, isPlaying, isAnimating]); // Add isPlaying and isAnimating dependencies
+  }, [activeIndex, totalItems, halfItemsCount, isMuted, isPlaying, isAnimating, isReady]); // <-- Added isReady here
 
   // Manejadores para video
   const handleVideoMouseEnter = (e: React.MouseEvent<HTMLDivElement>, videoIndex: number) => {
