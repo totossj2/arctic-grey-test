@@ -29,6 +29,21 @@ const VolumeOffIcon = () => (
   </svg>
 );
 
+// Play/Pause Icons
+const PlayIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 3L19 12L5 21V3Z" fill="white" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 4H10V20H6V4Z" fill="white" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 4H18V20H14V4Z" fill="white" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+
 interface VideoItem {
   id: string;
   videoUrl: string;
@@ -67,6 +82,8 @@ export default function VideoCarousel({
   const [isReady, setIsReady] = useState(false); // Nuevo estado para controlar la visibilidad inicial
   const [isMuted, setIsMuted] = useState(true); // State for mute status
   const [showVolumeButton, setShowVolumeButton] = useState(false); // State to show volume button on hover
+  const [isPlaying, setIsPlaying] = useState(true); // State for play/pause status of the center video
+  const [showPlayPauseButton, setShowPlayPauseButton] = useState(false); // State to show play/pause button
 
   // Calcular el ancho de cada item basado en el contenedor
   const calculateItemWidth = () => {
@@ -112,26 +129,45 @@ export default function VideoCarousel({
   // Efectivamente manejamos el total de videos
   const totalItems = videos.length;
 
-  // Navegación con bloqueo durante animación y mute
-  const handlePrev = () => {
-    if (isAnimating) return;
-    setDirection(-1);
+  // Navegación con bloqueo durante animación y mute/play reset
+  const navigateToIndex = (newIndex: number) => {
+    if (isAnimating || newIndex === activeIndex) return;
+
+    const diff = newIndex - activeIndex;
+    // Determine direction based on the shortest path around the circle
+    let direction = 0;
+    if (Math.abs(diff) <= totalItems / 2) {
+      direction = diff > 0 ? 1 : -1;
+    } else {
+      direction = diff > 0 ? -1 : 1; // Wrap around
+    }
+    // Handle edge case where diff is exactly half the totalItems
+    if (Math.abs(diff) === totalItems / 2) {
+      direction = 1; // Or -1, consistency is key
+    }
+
+
+    setDirection(direction);
     setIsAnimating(true);
     setIsMuted(true); // Mute on navigation
-    setActiveIndex((prev) => (prev - 1 + totalItems) % totalItems);
+    setIsPlaying(true); // Ensure new center video starts playing
+    setShowPlayPauseButton(false); // Hide play/pause button during transition
+    setActiveIndex(newIndex);
     setTimeout(() => setIsAnimating(false), 500); // Coincidir con duración de la transición
+  };
+
+
+  const handlePrev = () => {
+    const newIndex = (activeIndex - 1 + totalItems) % totalItems;
+    navigateToIndex(newIndex);
   };
 
   const handleNext = () => {
-    if (isAnimating) return;
-    setDirection(1);
-    setIsAnimating(true);
-    setIsMuted(true); // Mute on navigation
-    setActiveIndex((prev) => (prev + 1) % totalItems);
-    setTimeout(() => setIsAnimating(false), 500); // Coincidir con duración de la transición
+    const newIndex = (activeIndex + 1) % totalItems;
+    navigateToIndex(newIndex);
   };
 
-  // Auto-reproducir video central y pausar los demás
+  // Auto-reproducir video central y pausar los demás, respecting isPlaying state
   useEffect(() => {
     const videoElements = carouselRef.current?.querySelectorAll('video') || [];
 
@@ -145,14 +181,15 @@ export default function VideoCarousel({
         ? virtualIndex
         : virtualIndex - totalItems;
 
-      // Central = reproducir, resto = pausar
+      // Central = reproducir/pausar, resto = pausar
       if (position === 0) {
-        // Attempt to play the center video
-        video.play().catch((error) => {
-          // Autoplay might be blocked by the browser, especially if the user hasn't interacted yet.
-          // We don't necessarily need to log this, but it's good to be aware.
-          // console.warn("Autoplay failed:", error);
-        });
+        if (isPlaying) {
+          video.play().catch((error) => {
+            // console.warn("Autoplay/play failed:", error);
+          });
+        } else {
+          video.pause();
+        }
       } else {
         video.pause();
         video.currentTime = 0; // Optional: Reset video time when it's not central
@@ -160,7 +197,10 @@ export default function VideoCarousel({
       // Apply mute state to all videos
       video.muted = isMuted;
     });
-  }, [activeIndex, totalItems, halfItemsCount, isMuted]); // Add isMuted dependency
+    // Show play/pause button only for the center video when not animating
+    setShowPlayPauseButton(!isAnimating);
+
+  }, [activeIndex, totalItems, halfItemsCount, isMuted, isPlaying, isAnimating]); // Add isPlaying and isAnimating dependencies
 
   // Manejadores para video
   const handleVideoMouseEnter = (e: React.MouseEvent<HTMLDivElement>, videoIndex: number) => {
@@ -172,17 +212,18 @@ export default function VideoCarousel({
     // Only show volume button if hovering over the center video
     if (position === 0) {
       setShowVolumeButton(true);
-      // Play is now handled by the useEffect, no need to play on hover enter
-      // const videoElement = e.currentTarget.querySelector('video');
-      // videoElement?.play().catch(() => { });
+      setShowPlayPauseButton(true); // Show play/pause on hover center
     } else {
       // Ensure button is hidden if hovering over non-center videos
       setShowVolumeButton(false);
+      // Ensure play/pause is hidden if hovering over non-center videos
+      setShowPlayPauseButton(false);
     }
   };
 
   const handleVideoMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     setShowVolumeButton(false); // Hide volume button on leave
+    setShowPlayPauseButton(false); // Hide play/pause button on leave
     // Pause is handled by useEffect when the video is no longer central
     // No need to pause on mouse leave anymore unless specific behavior is desired
     /*
@@ -208,26 +249,26 @@ export default function VideoCarousel({
     setIsMuted(prev => !prev);
   };
 
-  // Handler to toggle play/pause on video click
-  const handleVideoElementClick = (e: React.MouseEvent<HTMLVideoElement>, index: number) => {
-    // Check if the clicked video is the center one
-    const virtualIndex = (index - activeIndex + totalItems) % totalItems;
-    const position = virtualIndex <= halfItemsCount
-      ? virtualIndex
-      : virtualIndex - totalItems;
+  // Handler for clicking the video item container
+  const handleVideoItemClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
+    // Prevent the click from navigating the link if the click is on the video area
+    const target = e.target as HTMLElement;
+    const isVideoContainerClick = target.closest('.video-container-class');
 
-    if (position === 0) {
-      e.preventDefault(); // Prevent any default video behavior or bubbling
-      e.stopPropagation(); // Stop the click from reaching the parent <a> tag
-      const videoElement = e.currentTarget;
-      if (videoElement.paused) {
-        videoElement.play().catch(() => { }); // Attempt to play
+    if (isVideoContainerClick) {
+      e.preventDefault();
+      e.stopPropagation(); // Stop bubbling to the <a> tag
+
+      if (index === activeIndex) {
+        // Clicked on the currently active video: toggle play/pause
+        setIsPlaying(prev => !prev);
       } else {
-        videoElement.pause(); // Pause if playing
+        // Clicked on a non-active video: navigate to it
+        navigateToIndex(index);
       }
     }
-    // If it's not the center video, clicking the video itself does nothing extra,
-    // the click might bubble up to the <a> tag if not stopped.
+    // If the click is not on the video container (e.g., on the product info below),
+    // the event will bubble up to the <a> tag and navigate.
   };
 
 
@@ -312,7 +353,7 @@ export default function VideoCarousel({
                   <div
                     key={video.id}
                     data-video-index={index}
-                    className="absolute transition-all duration-500 ease-out"
+                    className="absolute transition-all duration-500 ease-out cursor-pointer" // Add cursor-pointer
                     style={{
                       width: `${itemWidth}px`,
                       transform: `translateX(${translateX}px)`,
@@ -321,28 +362,19 @@ export default function VideoCarousel({
                     }}
                     onMouseEnter={(e) => handleVideoMouseEnter(e, index)}
                     onMouseLeave={handleVideoMouseLeave}
-                  // Remove the click handler from the main div
-                  // onClick={(e) => handleVideoClick(e, index)}
+                    onClick={(e) => handleVideoItemClick(e, index)} // Attach click handler here
                   >
                     <a
                       href={video.productLink}
-                      className="block cursor-pointer relative"
+                      className="block relative" // Removed cursor-pointer from here
                       target="_blank"
                       rel="noopener noreferrer"
-                      // Prevent link navigation only if the center video itself was clicked
-                      onClick={(e) => {
-                        const virtualIndex = (index - activeIndex + totalItems) % totalItems;
-                        const position = virtualIndex <= halfItemsCount ? virtualIndex : virtualIndex - totalItems;
-                        // Check if the click target was the video element itself
-                        if (position === 0 && (e.target as HTMLElement).tagName === 'VIDEO') {
-                          e.preventDefault();
-                        }
-                        // Otherwise, allow the link to work
-                      }}
+                    // Removed the complex onClick logic from here, handled by the parent div's onClick
                     >
                       {/* Contenedor de video con altura fija y max-height variable */}
                       <div
-                        className={`relative overflow-hidden rounded-md bg-gray-200 shadow-md transition-all duration-500 ease-out ${position === 0 ? 'shadow-xl' : ''}`}
+                        // Add a specific class to identify the video container area
+                        className={`video-container-class relative overflow-hidden rounded-md bg-gray-200 shadow-md transition-all duration-500 ease-out ${position === 0 ? 'shadow-xl' : ''}`}
                         style={{
                           height: 500, // Altura fija para todos (misma que el max-height del activo)
                           maxHeight: maxHeight, // Recorta según la posición
@@ -350,7 +382,7 @@ export default function VideoCarousel({
                       >
                         <video
                           src={video.videoUrl}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover pointer-events-none" // Add pointer-events-none
                           style={{
                             objectPosition: 'center top' // Anclar al borde superior
                           }}
@@ -359,13 +391,18 @@ export default function VideoCarousel({
                           preload="metadata"
                           poster=""
                           muted={isMuted} // Control mute via state
-                          // Add the click handler directly to the video element
-                          onClick={(e) => handleVideoElementClick(e, index)}
+                        // REMOVED onClick handler from video element
                         />
+                        {/* Play/Pause Button Overlay - Show only on center video HOVER */}
+                        {position === 0 && showPlayPauseButton && ( // Condition updated
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10 transition-opacity duration-200">
+                            {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                          </div>
+                        )}
                         {/* Volume Button - Show only on center video hover */}
                         <button
                           onClick={toggleMute} // Keep toggleMute specific to this button
-                          className={`absolute bottom-3 right-3 z-20 p-2 bg-black/50 rounded-full transition-opacity duration-200 ${position === 0 && showVolumeButton ? 'opacity-100' : 'opacity-0'}`}
+                          className={`absolute bottom-3 right-3 z-20 p-2 bg-black/50 rounded-full transition-opacity duration-200 ${position === 0 && showVolumeButton ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} // Add pointer-events-auto
                           aria-label={isMuted ? "Activar sonido" : "Desactivar sonido"}
                         >
                           {isMuted ? <VolumeOffIcon /> : <VolumeOnIcon />}
