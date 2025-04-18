@@ -1,6 +1,6 @@
 import { json, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 // Assuming COLLECTION_PRODUCTS_QUERY is correctly exported from Bundles or a shared location
-import { COLLECTION_PRODUCTS_QUERY } from '~/components/Bundles';
+import { COLLECTION_PRODUCTS_QUERY } from '~/querys/collection-products';
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
     const { storefront } = context;
@@ -18,8 +18,8 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
         const { collection } = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
             variables: {
                 id: collectionId,
-                country: storefront.i18n.country,
-                language: storefront.i18n.language,
+                // country: storefront.i18n.country, // Comentado o eliminado
+                // language: storefront.i18n.language, // Comentado o eliminado
             },
             // Add caching if desired: cache: storefront.CacheShort()
         });
