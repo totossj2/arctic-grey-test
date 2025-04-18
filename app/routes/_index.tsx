@@ -14,6 +14,7 @@ import InformativeItems from '~/components/InformativeItems';
 import VideoCarousel from '~/components/VideoCarousel';
 import Bundles from '~/components/Bundles';
 import FeaturedProducts from '~/components/FeaturedProducts';
+import Video from '~/components/Video';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
@@ -125,6 +126,7 @@ export default function Homepage() {
       <VideoCarousel videos={videos} />
       <Bundles initialCollection={bundlesInitialCollection?.collection ?? null} />
       <FeaturedProducts products={featuredProducts}/>
+      <Video />
     </div>
   );
 }
