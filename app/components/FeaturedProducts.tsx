@@ -89,7 +89,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
         <h2 className="text-3xl md:text-4xl font-bold mb-10 md:mb-16 min-h-[48px] flex items-center justify-center">
           {productTitle}
         </h2>
-        <div className='flex flex-row items-center justify-around mb-8'>
+        <div className='flex flex-row items-center justify-around '>
           {totalProducts > 1 && (
             <button
               aria-label="Previous Item"
@@ -99,7 +99,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
               <ArrowLeftIcon />
             </button>
           )}
-          <div className="relative bg-white rounded-[8px] w-[85%] p-6 md:p-10 lg:p-12 lg:px-8">
+          <div className="relative bg-white rounded-[8px] w-[85%] ">
             <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
               <div className="w-full lg:w-[43%] flex justify-center lg:justify-end">
                 <div className="max-w-md w-full">
@@ -107,7 +107,6 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                     <Image
                       key={featuredProduct.id}
                       data={featuredProduct.images.nodes[0]}
-                      alt={featuredProduct.images.nodes[0]?.altText ?? `Image of ${featuredProduct.title}`}
                       sizes="(max-width: 1024px) 90vw, 40vw"
                       className="w-full h-auto object-contain rounded transition-opacity duration-300 ease-in-out"
                     />
@@ -119,7 +118,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 </div>
               </div>
               <div className="w-full lg:w-full text-left flex flex-col">
-                <div className="bg-[#1B1F23] text-white text-center w-full py-8 px-14 gap-6 flex flex-col mb-8 rounded-t-lg">
+                <div className="bg-[#1B1F23] text-white text-center w-full py-8 px-14 gap-6 flex flex-col rounded-t-lg">
                   <h3 className="text-2xl font-medium">The Blend</h3>
                   <div className="flex justify-around items-start min-h-[60px]">
                     {blendTags.length > 0 ? (
@@ -141,17 +140,15 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                     ))}
                   </div>
                 </div>
-                <div className="px-14 py-8 flex gap-8 flex-col items-center flex-grow bg-white rounded-b-lg">
+                <div className="px-14 py-8 flex gap-8 flex-col items-center flex-grow bg-white rounded-b-lg ">
                   <h4 className="text-lg font-medium text-center">Active Ingredients</h4>
-                  <div className="grid grid-cols-3 gap-4 md:gap-6 text-left w-full">
+                  <div className="grid grid-cols-3 gap-4 md:gap-6 text-left w-full ">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex flex-col items-start gap-3">
-                        <div className='flex flex-row items-center gap-2'>
-                          <div className="flex items-center justify-center w-fit h-fit p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
-                            <LeafIcon fill='#1B1F23' />
-                          </div>
-                          <h5 className="font-medium text-[16px]">{productTitle}</h5>
+                      <div key={i} className="flex flex-col items-start gap-3 h-[180px]">
+                        <div className="flex items-center justify-center w-fit h-fit p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
+                          <LeafIcon fill='#1B1F23' />
                         </div>
+                        <h5 className="font-medium text-[16px]">{productTitle}</h5>
                         <p className="text-sm text-[#1B1F23]/60 leading-snug line-clamp-3 overflow-hidden">
                           {productDescription}
                         </p>
