@@ -1,27 +1,8 @@
 // RecommendedProducts.tsx
 import { Suspense, useState, useRef, useEffect } from 'react';
-import { Await } from '@remix-run/react';
+import { Await, useFetcher } from '@remix-run/react';
 import { ProductCard, PRODUCT_CARD_FRAGMENT, ProductNode } from './ProductCard';
 import type { CollectionProductsQuery } from 'storefrontapi.generated';
-
-// Define and export the GraphQL query using the fragment
-export const COLLECTION_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT} 
-  query CollectionProducts(
-    $id: ID!
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    collection(id: $id) {
-      title
-      products(first: 8) {
-        nodes {
-          ...ProductCard
-        }
-      }
-    }
-  }
-` as const;
 
 // SVGs omited…
 // Placeholder Arrow SVG components
@@ -37,137 +18,177 @@ const ArrowRightIcon = () => (
 );
 
 interface Props {
-    products: Promise<CollectionProductsQuery | null>;
+    initialCollection: CollectionProductsQuery['collection'] | null;
 }
 
-export default function RecommendedProducts({ products }: Props) {
-    // Static data for tags - adjust as needed
+// Mapeo de categorías a IDs de colección (Añade los IDs que faltan si los tienes)
+const categoryCollectionIds: { [key: string]: string } = {
+    'Sleep': 'gid://shopify/Collection/509335437588',
+    'Cognitive Function': 'gid://shopify/Collection/509335503124',
+    'Foundational Health': 'gid://shopify/Collection/509335535892',
+    'Athletic Performance': 'gid://shopify/Collection/509340090644',
+    'Hormone Support': 'gid://shopify/Collection/509340123412',
+};
 
-    const [selectedCategory, setSelectedCategory] = useState('Sleep'); // Add state for selected category
+// Definir las categorías que tienen un ID asociado
+const availableCategories = Object.keys(categoryCollectionIds);
 
+export default function Bundles({ initialCollection }: Props) {
+    const fetcher = useFetcher<CollectionProductsQuery>();
+    const [selectedCategory, setSelectedCategory] = useState(availableCategories[0] || 'Sleep');
+    const [startIndex, setStartIndex] = useState(0);
+    const carouselContainerRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState<number | null>(null);
+    const gapPx = 24;
+    const itemsPerPage = 4;
+
+    // Efecto para iniciar la carga de datos
+    useEffect(() => {
+        const isInitialCategory = selectedCategory === availableCategories[0];
+        if (isInitialCategory && initialCollection) {
+            return; 
+        }
+        const collectionId = categoryCollectionIds[selectedCategory];
+        if (collectionId) {
+            if (fetcher.state === 'idle' && (!fetcher.data || (fetcher.data.collection as any)?.id !== collectionId)) {
+                fetcher.load(`/api/collection-products?collectionId=${collectionId}`);
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCategory, initialCollection]); // Depende solo de la categoría y datos iniciales
+
+    const handleCategoryClick = (category: string) => {
+        if (category !== selectedCategory) {
+            setSelectedCategory(category);
+            setStartIndex(0);
+        }
+    };
+
+    // Hook para ResizeObserver
+    useEffect(() => {
+        const el = carouselContainerRef.current;
+        if (!el) return;
+        const ro = new ResizeObserver(([entry]) => {
+            setContainerWidth(entry.contentRect.width);
+        });
+        ro.observe(el);
+        setContainerWidth(el.offsetWidth);
+        return () => ro.disconnect();
+    }, []); // Ejecutar solo una vez al montar
+
+    // Determinar qué datos mostrar de forma unificada
+    const isInitialCategorySelected = selectedCategory === availableCategories[0];
+    let currentCollectionData: CollectionProductsQuery['collection'] | null | undefined = null;
+
+    if (isInitialCategorySelected && initialCollection) {
+        currentCollectionData = initialCollection;
+    } else if (fetcher.data?.collection) {
+        if (!isInitialCategorySelected || !initialCollection) {
+             currentCollectionData = fetcher.data.collection;
+        }
+    }
+    if (!currentCollectionData && isInitialCategorySelected && initialCollection) {
+        currentCollectionData = initialCollection;
+    }
+
+    // Usamos 'as any' temporalmente para evitar error de linter.
+    const productsToShow: ProductNode[] = (currentCollectionData?.products?.nodes || []) as ProductNode[];
+    const collectionTitle = (currentCollectionData as any)?.title ?? "Bundles";
+    const collectionHandle = (currentCollectionData as any)?.handle ?? 'all';
+
+    // Lógica del carrusel
+    const handlePrev = () => setStartIndex(i => Math.max(0, i - 1));
+    const handleNext = () =>
+        setStartIndex(i =>
+            Math.min(Math.max(0, productsToShow.length - itemsPerPage), i + 1)
+        );
+
+    const canPrev = startIndex > 0;
+    const canNext = startIndex < productsToShow.length - itemsPerPage;
+    const itemW = containerWidth !== null
+        ? (containerWidth - (itemsPerPage - 1) * gapPx) / itemsPerPage
+        : 0;
+    const tx = containerWidth !== null
+        ? startIndex * (itemW + gapPx)
+        : 0;
+
+    // Renderizar el componente
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
             <div className="max-w-screen">
-                <Suspense fallback={<div className="text-center py-10">Loading products...</div>}>
-                    <Await resolve={products}>
-                        {(response) => {
-                            console.log('Await response:', response);
+                {/* Header y botones de categoría */}
+                <div className="flex flex-row items-center justify-between mb-8 w-full">
+                    <div className="text-center flex flex-row items-center gap-32 ">
+                        <div className="text-center flex flex-row items-center justify-start ">
+                            <div className="text-start">
+                                <p className="text-base text-[#1B1F23] ">
+                                    <span role="img" aria-label="thinking face" >📦</span> Goals Specific
+                                </p>
+                                <h2 className="mt-2 text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
+                                    Bundles
+                                </h2>
+                            </div>
+                        </div>
+                        <div className='flex flex-row items-center justify-center gap-12 text-[#1B1F23] text-[14px]'>
+                            {availableCategories.map((category) => (
+                                <li
+                                    key={category}
+                                    className={`list-none cursor-pointer ${selectedCategory === category ? 'underline underline-offset-10 decoration-1' : ''}`}
+                                    onClick={() => handleCategoryClick(category)}
+                                >
+                                    {category}
+                                </li>
+                            ))}
+                        </div>
+                    </div>
+                    {/* Botones de navegación del carrusel */}
+                    <div className="flex flex-row items-center justify-end gap-4">
+                        <div className="text-center">
+                            <a href={`/collections/${collectionHandle}`} className="text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All Bundles</a>
+                        </div>
+                        <button
+                            className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                            onClick={handlePrev} disabled={!canPrev || fetcher.state === 'loading'} aria-label="Previous products"
+                        >
+                            <ArrowLeftIcon />
+                        </button>
+                        <button
+                            className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                            onClick={handleNext} disabled={!canNext || fetcher.state === 'loading'} aria-label="Next products"
+                        >
+                            <ArrowRightIcon />
+                        </button>
+                    </div>
+                </div>
 
-                            // Temporary: Cast response to any to access title
-                            const collectionTitle = (response as any)?.collection?.title || "Products";
-                            const allProducts = (response as any)?.collection?.products?.nodes || [];
-
-                            const [startIndex, setStartIndex] = useState(0);
-                            const itemsPerPage = 4;
-                            const carouselContainerRef = useRef<HTMLDivElement>(null);
-                            const [containerWidth, setContainerWidth] = useState<number | null>(null);
-                            const gapPx = 24;
-
-                            useEffect(() => {
-                                const el = carouselContainerRef.current;
-                                if (!el) return;
-                                const ro = new ResizeObserver(([entry]) => {
-                                    setContainerWidth(entry.contentRect.width);
-                                });
-                                ro.observe(el);
-                                setContainerWidth(el.offsetWidth);
-                                return () => ro.disconnect();
-                            }, [allProducts]);
-
-                            if (allProducts.length === 0) {
-                                return <div className="text-center py-10">No products found in {collectionTitle}.</div>;
-                            }
-
-                            const handlePrev = () => setStartIndex(i => Math.max(0, i - 1));
-                            const handleNext = () =>
-                                setStartIndex(i =>
-                                    Math.min(Math.max(0, allProducts.length - itemsPerPage), i + 1)
-                                );
-
-                            const canPrev = startIndex > 0;
-                            const canNext = startIndex < allProducts.length - itemsPerPage;
-                            const itemW = containerWidth !== null
-                                ? (containerWidth - (itemsPerPage - 1) * gapPx) / itemsPerPage
-                                : 0;
-                            const tx = containerWidth !== null
-                                ? startIndex * (itemW + gapPx)
-                                : 0;
-
-                            const categories = ['Sleep', 'Cognitive Function', 'Foundational Health', 'Athletic Performance', 'Hormone Support']; // Define categories
-
-                            return (
-                                <>
-                                    {/* Header and Buttons */}
-                                    <div className="flex flex-row items-center justify-between mb-8 w-full">
-                                        <div className="text-center flex flex-row items-center gap-32 ">
-                                            <div className="text-center flex flex-row items-center justify-start ">
-                                                <div className="text-start">
-                                                    <p className="text-base text-[#1B1F23] ">
-                                                        <span role="img" aria-label="thinking face" >📦</span> Goals Specific
-                                                    </p>
-                                                    <h2 className="mt-2 text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
-                                                        Bundles
-                                                    </h2>
-                                                </div>
-                                            </div>
-                                            <div className='flex flex-row items-center justify-center gap-12 text-[#1B1F23] text-[14px]'>
-                                                {categories.map((category) => (
-                                                    <li
-                                                        key={category}
-                                                        className={`list-none cursor-pointer ${selectedCategory === category ? 'underline underline-offset-10 decoration-1' : ''}`}
-                                                        onClick={() => setSelectedCategory(category)}
-                                                    >
-                                                        {category}
-                                                    </li>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center justify-end gap-4">
-                                            <div className="text-center">
-                                                <a href={`/collections/${collectionTitle}`} className="text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All Bundles</a>
-                                            </div>                                            <button
-                                                className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
-                                                onClick={handlePrev} disabled={!canPrev} aria-label="Previous products"
-                                            >
-                                                <ArrowLeftIcon />
-                                            </button>
-                                            <button
-                                                className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
-                                                onClick={handleNext} disabled={!canNext} aria-label="Next products"
-                                            >
-                                                <ArrowRightIcon />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Carousel Container - Always rendered for measurement */}
-                                    <div ref={carouselContainerRef} className="overflow-hidden w-full">
-                                        {/* Inner Sliding Container - Initially hidden, fades in */}
-                                        <div
-                                            className={`flex transition-transform duration-300 ease-in-out opacity-0 transition-opacity ${containerWidth !== null ? 'opacity-100' : ''}`}
-                                            style={{
-                                                gap: `${gapPx}px`,
-                                                transform: `translateX(-${tx}px)`,
-                                                // Add min-height matching placeholder to prevent layout shift if needed
-                                                minHeight: containerWidth === null ? '500px' : undefined
-                                            }}
-                                        >
-                                            {/* Render cards only if width is calculated to avoid incorrect initial styles */}
-                                            {containerWidth !== null && allProducts.map((product: ProductNode, idx: number) => (
-                                                <ProductCard
-                                                    key={product.id}
-                                                    product={product}
-                                                    style={{ width: `${itemW}px`, flexShrink: 0 }}
-                                                    version='bundle'
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
-                            );
+                {/* Contenedor del carrusel con minHeight fijo */}
+                <div 
+                    ref={carouselContainerRef} 
+                    className="overflow-hidden w-full relative" 
+                    style={{ minHeight: '500px' }} // Altura mínima fija (ajusta el valor si es necesario)
+                >
+                    {/* Div interno sin clases de transición */}
+                    <div
+                        className="flex" 
+                        style={{
+                            gap: `${gapPx}px`,
+                            transform: `translateX(-${tx}px)`,
                         }}
-                    </Await>
-                </Suspense>
+                    >
+                         {containerWidth !== null && productsToShow.length > 0 ? (
+                            productsToShow.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                    style={{ width: `${itemW}px`, flexShrink: 0 }}
+                                    version='bundle'
+                                />
+                            ))
+                        ) : (
+                             fetcher.state !== 'loading' && <div className="text-center py-10 w-full">No products found in {collectionTitle}.</div>
+                        )}
+                    </div>
+                </div>
             </div>
         </section>
     );

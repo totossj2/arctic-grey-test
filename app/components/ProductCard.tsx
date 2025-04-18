@@ -89,7 +89,7 @@ export function ProductCard({ product, style, version = 'default' }: ProductCard
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap flex-col gap-1.5 absolute top-0 left-0 z-10">
               {product.tags.map(tag =>
-                (tag === 'new' || tag === 'bestseller') ? (
+                (tag === 'New Release' || tag === 'bestseller') ? (
                   <span key={tag} className={` bg-[#FFED92] text-[#1B1F23] text-[12px] capitalize flex items-center gap-1 px-[10px] py-[6px] rounded-[4px]`}>
                     {tag}
                   </span>
@@ -105,7 +105,7 @@ export function ProductCard({ product, style, version = 'default' }: ProductCard
       {product.tags && product.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {product.tags.map(tag =>
-            (tag !== 'new' && tag !== 'bestseller') ? (
+            (tag !== 'New Release' && tag !== 'bestseller') ? (
               <span key={tag} className={`${version === 'bundle' ? 'bg-[#FFFFFF]' : 'bg-[#F6F6F6]'} text-gray-800 text-[10px] flex items-center gap-1 px-2 py-0.5 rounded-[4px]`}>
                 <svg width="5" height="6" viewBox="0 0 5 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="2.5" cy="3" r="2.5" fill="#101226" />
