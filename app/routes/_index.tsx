@@ -5,31 +5,71 @@ import { Image, Money } from '@shopify/hydrogen';
 import { Hero } from '~/components/Hero';
 import { Testimonials } from '~/components/Testimonials';
 import type { CollectionProductsQuery } from 'storefrontapi.generated';
+import { COLLECTION_PRODUCTS_QUERY } from '~/components/RecommendedProducts';
+import { PRODUCT_CARD_FRAGMENT } from '~/components/ProductCard';
 
 import Goals from '~/components/Goals';
-import RecommendedProducts, { COLLECTION_PRODUCTS_QUERY } from '~/components/RecommendedProducts';
+import RecommendedProducts from '~/components/RecommendedProducts';
 import InformativeItems from '~/components/InformativeItems';
 import VideoCarousel from '~/components/VideoCarousel';
 import Bundles from '~/components/Bundles';
+import FeaturedProducts from '~/components/FeaturedProducts';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
 };
 
+const BUNDLES_COLLECTION_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query BundlesCollection(
+    $id: ID!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(id: $id) {
+      id
+      title
+      handle
+      products(first: 8) {
+        nodes {
+          ...ProductCard
+        }
+      }
+    }
+  }
+` as const;
+
+
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
-  const data = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
+
+  const recommendedCollectionData = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
     variables: {
       id: "gid://shopify/Collection/509271015700"
     },
   });
 
-  return json({ products: data });
+  const bundlesInitialData = await storefront.query(BUNDLES_COLLECTION_QUERY, {
+    variables: {
+      id: "gid://shopify/Collection/509335437588"
+    },
+  });
+
+  const featuredProducts = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
+    variables: {
+      id: "gid://shopify/Collection/509341991188"
+    },
+  });
+
+  return json({
+    recommendedCollection: recommendedCollectionData,
+    bundlesInitialCollection: bundlesInitialData,
+    featuredProducts: featuredProducts,
+  });
 }
 
-
 export default function Homepage() {
-  const { products } = useLoaderData<typeof loader>();
+  const { recommendedCollection, bundlesInitialCollection, featuredProducts } = useLoaderData<typeof loader>();
 
   const videos = [
     {
@@ -80,10 +120,11 @@ export default function Homepage() {
       <Hero />
       <Testimonials />
       <Goals />
-      <RecommendedProducts products={products} />
+      <RecommendedProducts products={recommendedCollection} />
       <InformativeItems />
       <VideoCarousel videos={videos} />
-      <Bundles products={products} />
+      <Bundles initialCollection={bundlesInitialCollection?.collection ?? null} />
+      <FeaturedProducts products={featuredProducts}/>
     </div>
   );
 }
