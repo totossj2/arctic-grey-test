@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSwipeable } from 'react-swipeable';
 
 // SVGs de flechas (iguales a RecommendedProducts.tsx)
 const ArrowLeftIcon = () => (
@@ -168,6 +169,22 @@ export default function VideoCarousel({
     navigateToIndex(newIndex);
   };
 
+  // Configuración de Swipeable
+  const { ref: swipeableRef, ...handlers } = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    trackMouse: true,
+    preventScrollOnSwipe: true,
+  });
+
+  // Efecto para aplicar la ref de swipeable
+  useEffect(() => {
+    if (typeof swipeableRef === 'function') {
+      swipeableRef(carouselRef.current);
+    }
+    // Incluye swipeableRef en las dependencias si cambia
+  }, [swipeableRef]);
+
   // Auto-reproducir video central y pausar los demás, respecting isPlaying state
   useEffect(() => {
     // Ensure videos are rendered before trying to control them
@@ -295,7 +312,7 @@ export default function VideoCarousel({
         <div className="flex flex-col items-center justify-center gap-4 mb-8">
           <div className="text-center flex flex-row items-center justify-center gap-16">
             <button
-              className="p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              className="p-3 mb-[-200px] rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
               onClick={handlePrev}
               disabled={isAnimating}
               aria-label="Videos anteriores"
@@ -304,10 +321,10 @@ export default function VideoCarousel({
             </button>
             <div className="flex flex-col items-center justify-center">
               {subTitle && <div className="text-sm text-gray-600 mb-1">{subTitle}</div>}
-              <h2 className="text-[40px] font-medium text-[#1B1F23] tracking-tight">{title}</h2> {/* Fixed closing tag */}
+              <h2 className="text-2xl md:text-[40px] font-medium text-[#1B1F23] tracking-tight">{title}</h2> {/* Fixed closing tag */}
             </div>
             <button
-              className="p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              className="p-3 mb-[-200px] rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
               onClick={handleNext}
               disabled={isAnimating}
               aria-label="Videos siguientes"
@@ -327,6 +344,7 @@ export default function VideoCarousel({
         {/* Carrusel Principal */}
         <div
           ref={carouselRef}
+          {...handlers}
           className={`relative w-full h-[650px] flex items-center justify-center transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Renderizamos los videos solo cuando esté listo */}
