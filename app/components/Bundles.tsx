@@ -150,13 +150,15 @@ export default function Bundles({ initialCollection }: Props) {
     const collectionHandle = (currentDataForMeta as any)?.handle ?? 'all';
 
 
-    // Lógica del carrusel - depends on state itemsPerPage
-    const handlePrev = () => setStartIndex(i => Math.max(0, i - 1));
-    const handleNext = () =>
-        setStartIndex(i =>
-            Math.min(Math.max(0, productsToShow.length - itemsPerPage), i + 1) // Use state itemsPerPage
-        );
-
+    const handlePrev = () => {
+        setStartIndex(i => Math.max(0, i - itemsPerPage));
+        };
+        
+        const handleNext = () => {
+        const maxIndex = Math.max(0, productsToShow.length - itemsPerPage);
+        setStartIndex(i => Math.min(i + itemsPerPage, maxIndex));
+        };
+      
     const canPrev = startIndex > 0;
     const canNext = startIndex < productsToShow.length - itemsPerPage; // Use state itemsPerPage
 
@@ -184,7 +186,7 @@ export default function Bundles({ initialCollection }: Props) {
                 {/* Use flex-col on small screens, flex-row on larger screens */}
                 <div className="flex flex-col lg:flex-row items-center justify-between mb-8 w-full gap-6 lg:gap-0">
                     {/* Title section */}
-                    <div className="flex flex-row items-center gap-4 lg:gap-8 w-full lg:w-auto"> {/* Adjusted gap */}
+                    <div className="flex flex-row justify-between items-center gap-4 lg:gap-8 w-full lg:w-auto"> {/* Adjusted gap */}
                         <div className="text-start">
                            <p className="text-sm md:text-base text-[#1B1F23]"> {/* Adjusted text size */}
                                <span role="img" aria-label="thinking face" className="mr-1">📦</span> Goals Specific
@@ -193,6 +195,8 @@ export default function Bundles({ initialCollection }: Props) {
                                Bundles
                            </h2>
                         </div>
+                        <a href={`/collections/${collectionHandle}`} className="block md:hidden text-base md:text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline">View All Bundles</a>
+
                     </div>
 
                      {/* Category buttons - wrap on smaller screens */}
@@ -209,10 +213,10 @@ export default function Bundles({ initialCollection }: Props) {
                     </div>
 
                     {/* Navigation section - stack on small screens */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">
+                    <div className="flex  flex-row-reverse md:flex-row items-center justify-between md:justify-center sm:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">
                         <div className="text-center order-2 sm:order-1">
                              {/* Adjusted text size */}
-                            <a href={`/collections/${collectionHandle}`} className="text-base md:text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline">View All Bundles</a>
+                            <a href={`/collections/${collectionHandle}`} className="hidden md:block text-base md:text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline">View All Bundles</a>
                         </div>
                          {/* Buttons */}
                         <div className="flex flex-row items-center gap-3 order-1 sm:order-2"> {/* Adjusted gap */}

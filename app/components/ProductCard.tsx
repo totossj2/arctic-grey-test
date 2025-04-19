@@ -83,9 +83,11 @@ export function ProductCard({ product, style, version = 'default' }: ProductCard
               aspectRatio="1/1"
               sizes="(min-width: 45em) 20vw, 50vw"
               className="w-full h-full object-contain transition-transform duration-300"
-              draggable="false"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
             />
           )}
+          
 
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap flex-col gap-1.5 absolute top-0 left-0 z-10">
