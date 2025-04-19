@@ -83,6 +83,7 @@ export function ProductCard({ product, style, version = 'default' }: ProductCard
               aspectRatio="1/1"
               sizes="(min-width: 45em) 20vw, 50vw"
               className="w-full h-full object-contain transition-transform duration-300"
+              draggable="false"
             />
           )}
 
