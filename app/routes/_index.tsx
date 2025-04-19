@@ -19,7 +19,7 @@ import Blogs from '~/components/Blogs';
 import { InstagramFeed } from '~/components/InstagramFeed';
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Hydrogen | Home' }];
+  return [{ title: 'UNCMFRT | Home - Arctic Grey Assesment' }];
 };
 
 const BUNDLES_COLLECTION_QUERY = `#graphql
