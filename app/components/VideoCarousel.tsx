@@ -312,7 +312,7 @@ export default function VideoCarousel({
         <div className="flex flex-col items-center justify-center gap-4 mb-8">
           <div className="text-center flex flex-row items-center justify-center gap-16">
             <button
-              className="p-3 mb-[-200px] rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              className="p-3 hidden md:block rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
               onClick={handlePrev}
               disabled={isAnimating}
               aria-label="Videos anteriores"
@@ -324,7 +324,7 @@ export default function VideoCarousel({
               <h2 className="text-2xl md:text-[40px] font-medium text-[#1B1F23] tracking-tight">{title}</h2> {/* Fixed closing tag */}
             </div>
             <button
-              className="p-3 mb-[-200px] rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
+              className="p-3 hidden md:block rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer"
               onClick={handleNext}
               disabled={isAnimating}
               aria-label="Videos siguientes"
