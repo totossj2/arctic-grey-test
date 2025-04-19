@@ -47,7 +47,7 @@ export default function RecommendedProducts({ products }: Props) {
   };
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#F7F7F7]">
-      <div className="max-w-screen">
+      <div className="max-w-screen mx-auto">
         <Suspense fallback={<div className="text-center py-10">Loading products...</div>}>
           <Await resolve={products}>
             {(response) => {
@@ -58,84 +58,196 @@ export default function RecommendedProducts({ products }: Props) {
               const allProducts = (response as any)?.collection?.products?.nodes || [];
 
               const [startIndex, setStartIndex] = useState(0);
-              const itemsPerPage = 4;
               const carouselContainerRef = useRef<HTMLDivElement>(null);
               const [containerWidth, setContainerWidth] = useState<number | null>(null);
-              const gapPx = 24;
+              const [itemsPerPage, setItemsPerPage] = useState(4); // Default to 4, will update
+              const gapPx = 24; // Equivalent to gap-6 in Tailwind (24px)
 
+              // Touch swipe state
+              const touchStartX = useRef(0);
+              const touchEndX = useRef(0);
+              const isDragging = useRef(false);
+              const dragOffset = useRef(0); // To show visual drag feedback
+
+              // --- Responsive Logic ---
               useEffect(() => {
                 const el = carouselContainerRef.current;
                 if (!el) return;
+
+                const updateItemsPerPage = (width: number) => {
+                  if (width < 640) return 1; // sm breakpoint
+                  if (width < 768) return 2; // md breakpoint
+                  if (width < 1024) return 3; // lg breakpoint
+                  return 4; // >= lg breakpoint
+                };
+
                 const ro = new ResizeObserver(([entry]) => {
-                  setContainerWidth(entry.contentRect.width);
+                  const newWidth = entry.contentRect.width;
+                  setContainerWidth(newWidth);
+                  const newItemsPerPage = updateItemsPerPage(newWidth);
+                  // Adjust startIndex if it becomes invalid after resize
+                  setStartIndex(current => Math.min(current, Math.max(0, allProducts.length - newItemsPerPage)));
+                  setItemsPerPage(newItemsPerPage);
+
                 });
+
                 ro.observe(el);
-                setContainerWidth(el.offsetWidth);
+                // Initial calculation
+                const initialWidth = el.offsetWidth;
+                setContainerWidth(initialWidth);
+                const initialItemsPerPage = updateItemsPerPage(initialWidth);
+                 // Adjust startIndex if it becomes invalid after initial load
+                setStartIndex(current => Math.min(current, Math.max(0, allProducts.length - initialItemsPerPage)));
+                setItemsPerPage(initialItemsPerPage);
+
+
                 return () => ro.disconnect();
-              }, [allProducts]);
+              }, [allProducts.length]); // Rerun observer setup if product count changes
 
               if (allProducts.length === 0) {
                 return <div className="text-center py-10">No products found in {collectionTitle}.</div>;
               }
 
-              const handlePrev = () => setStartIndex(i => Math.max(0, i - 1));
-              const handleNext = () =>
-                setStartIndex(i =>
-                  Math.min(Math.max(0, allProducts.length - itemsPerPage), i + 1)
-                );
+              const handlePrev = () => {
+                  setStartIndex(i => Math.max(0, i - 1));
+                  dragOffset.current = 0; // Reset drag offset on navigation
+              }
+
+              const handleNext = () => {
+                  setStartIndex(i => Math.min(Math.max(0, allProducts.length - itemsPerPage), i + 1));
+                  dragOffset.current = 0; // Reset drag offset on navigation
+              }
 
               const canPrev = startIndex > 0;
-              const canNext = startIndex < allProducts.length - itemsPerPage;
-              const itemW = containerWidth !== null
+              const canNext = startIndex < Math.max(0, allProducts.length - itemsPerPage);
+
+              const itemW = containerWidth !== null && itemsPerPage > 0
                 ? (containerWidth - (itemsPerPage - 1) * gapPx) / itemsPerPage
                 : 0;
-              const tx = containerWidth !== null
+
+              // Calculate total offset including drag
+              const baseTx = containerWidth !== null && itemW > 0
                 ? startIndex * (itemW + gapPx)
                 : 0;
+              const totalTx = baseTx - dragOffset.current; // Subtract drag offset
+
+
+             // --- Touch Handlers ---
+              const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+                touchStartX.current = e.targetTouches[0].clientX;
+                touchEndX.current = touchStartX.current; // Initialize endX
+                isDragging.current = true;
+                // Disable transition during drag for immediate feedback
+                if (e.currentTarget) {
+                   e.currentTarget.style.transition = 'none';
+                }
+              };
+
+              const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+                if (!isDragging.current) return;
+                touchEndX.current = e.targetTouches[0].clientX;
+                const diff = touchStartX.current - touchEndX.current;
+                 // Limit drag offset visually if needed, but calculation uses full diff
+                dragOffset.current = diff;
+                 // Update transform directly for smooth feedback without re-render
+                 if (e.currentTarget) {
+                    e.currentTarget.style.transform = `translateX(-${totalTx}px)`;
+                 }
+              };
+
+               const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+                if (!isDragging.current) return;
+                isDragging.current = false;
+
+                 // Re-enable transition
+                 if (e.currentTarget) {
+                    e.currentTarget.style.transition = 'transform 0.3s ease-in-out';
+                    // Force repaint before transition
+                    void e.currentTarget.offsetWidth;
+                 }
+
+
+                const diff = touchStartX.current - touchEndX.current;
+                const threshold = itemW / 4; // Swipe threshold (e.g., 1/4 of item width)
+
+                if (Math.abs(diff) > threshold) {
+                  if (diff > 0 && canNext) { // Swipe left
+                    handleNext();
+                  } else if (diff < 0 && canPrev) { // Swipe right
+                    handlePrev();
+                  } else {
+                     // Snap back if swipe didn't cross threshold or couldn't move
+                     dragOffset.current = 0;
+                      if (e.currentTarget) {
+                        e.currentTarget.style.transform = `translateX(-${baseTx}px)`;
+                     }
+                  }
+                } else {
+                   // Snap back if swipe didn't cross threshold
+                   dragOffset.current = 0;
+                    if (e.currentTarget) {
+                      e.currentTarget.style.transform = `translateX(-${baseTx}px)`;
+                   }
+                }
+
+                 // Reset drag offset after snapping/navigation animation starts
+                 // (setTimeout might be needed if transition isn't instant)
+                 // setTimeout(() => dragOffset.current = 0, 300); // Match transition duration
+                 // Simpler: Resetting in handlePrev/Next and snapback covers it.
+              };
+
 
               return (
                 <>
-                  {/* Header and Buttons */}
+                  {/* Header and Buttons - Adjust visibility/layout for mobile? */}
                   <div className="flex flex-col items-center justify-center gap-4 mb-8">
-                    <div className="text-center flex flex-row items-center justify-center gap-16">
+                     {/* Centered Title and Subtitle for all screens */}
+                    <div className='flex flex-col items-center justify-center mb-4'>
+                         <div className="flex items-center capitalize justify-center text-sm sm:text-base text-black mb-1"><span className="mr-1 ">🌟</span> {collectionTitle}</div>
+                         <h2 className="text-3xl sm:text-4xl font-medium text-[#1B1F23] tracking-tight">Supplements</h2>
+                    </div>
+
+                     {/* Buttons and View All Link */}
+                    <div className="flex items-center justify-between w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto">
                       <button
-                        className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                        className={`p-2 sm:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
                         onClick={handlePrev} disabled={!canPrev} aria-label="Previous products"
                       >
                         <ArrowLeftIcon />
                       </button>
-                      <div className='flex flex-col items-center justify-center'>
-                        <div className="flex items-center capitalize justify-center text-[16px] text-black mb-1"><span className="mr-1 ">🌟</span> {collectionTitle}</div>
-                        <h2 className="text-[40px] font-medium text-[#1B1F23] tracking-tight">Supplements</h2>
-                      </div>
-                      <button
-                        className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                      <a href={`/collections/${collectionTitle}`} className="text-sm sm:text-base text-[#1B1F23] hover:text-[#1B1F23]/50 underline inline-block mx-4">View All</a>
+                       <button
+                        className={`p-2 sm:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
                         onClick={handleNext} disabled={!canNext} aria-label="Next products"
                       >
                         <ArrowRightIcon />
                       </button>
                     </div>
-                    <div className="text-center"><a href={`/collections/${collectionTitle}`} className="text-[16px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline mt-2 inline-block">View All</a></div>
                   </div>
 
                   {/* Carousel Container - Always rendered for measurement */}
-                  <div ref={carouselContainerRef} className="overflow-hidden w-full">
-                    {/* Inner Sliding Container - Initially hidden, fades in */}
+                  <div ref={carouselContainerRef} className="overflow-hidden w-full cursor-grab active:cursor-grabbing">
+                    {/* Inner Sliding Container - Add touch handlers */}
                     <div
-                      className={`flex transition-transform duration-300 ease-in-out opacity-0 transition-opacity ${containerWidth !== null ? 'opacity-100' : ''}`}
-                      style={{
-                        gap: `${gapPx}px`,
-                        transform: `translateX(-${tx}px)`,
-                        // Add min-height matching placeholder to prevent layout shift if needed
-                        minHeight: containerWidth === null ? '500px' : undefined
-                      }}
-                    >
-                      {/* Render cards only if width is calculated to avoid incorrect initial styles */}
-                      {containerWidth !== null && allProducts.map((product: ProductNode, idx: number) => (
+                       className={`flex opacity-0 transition-opacity ${containerWidth !== null ? 'opacity-100' : ''}`}
+                       style={{
+                         gap: `${gapPx}px`,
+                         transform: `translateX(-${totalTx}px)`, // Use totalTx including drag offset
+                         transition: isDragging.current ? 'none' : 'transform 0.3s ease-in-out', // Conditional transition
+                         minHeight: containerWidth === null ? '500px' : undefined // Prevent layout shift
+                       }}
+                       onTouchStart={handleTouchStart}
+                       onTouchMove={handleTouchMove}
+                       onTouchEnd={handleTouchEnd}
+                     >
+                      {/* Render cards only if width and itemW are calculated */}
+                      {containerWidth !== null && itemW > 0 && allProducts.map((product: ProductNode) => (
                         <ProductCard
                           key={product.id}
                           product={product}
                           style={{ width: `${itemW}px`, flexShrink: 0 }}
+                          // Prevent card interactions during swipe
+                          className={isDragging.current ? 'pointer-events-none' : ''}
                         />
                       ))}
                     </div>

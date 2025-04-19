@@ -64,14 +64,15 @@ interface ProductCardProps {
   product: ProductNode;
   style?: React.CSSProperties;
   version?: 'bundle' | 'default';
+  className?: string;
 }
 
-export function ProductCard({ product, style, version = 'default' }: ProductCardProps) {
+export function ProductCard({ product, style, version = 'default', className }: ProductCardProps) {
   const description = product.description || "High-quality supplement.";
 
   return (
     <div
-      className={`rounded-lg flex flex-col p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-white'}`}
+      className={`rounded-lg flex flex-col p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-white'} ${className || ''}`}
       style={style}
     >
       <Link to={`/products/${product.handle}`} className="block group mb-4">
