@@ -1,6 +1,6 @@
 import {Link, Await} from '@remix-run/react';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import {
   InstagramIcon,
   TwitterIcon,
@@ -8,7 +8,10 @@ import {
   YoutubeIcon,
   HeartIcon,
   CoffeeIcon,
+  PlusIcon,
+  MinusIcon,
 } from './icons'; // Import new icon components
+import {FooterContactColumn} from './FooterContactColumn'; // Import the new component
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -23,10 +26,26 @@ export function Footer({
 }: FooterProps) {
   const shopName = header?.shop?.name || 'UNCMFRT';
   const currentYear = new Date().getFullYear();
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailValue, setEmailValue] = useState('');
+
+  const handleSubscribeClick = () => {
+    if (emailValue && emailValue.includes('@')) {
+      console.log('Simulating email send for:', emailValue);
+      setEmailSent(true);
+      setEmailValue('');
+      setTimeout(() => {
+        setEmailSent(false);
+      }, 5000);
+    } else {
+      console.log('Invalid email for simulation');
+      setEmailSent(false);
+    }
+  };
 
   return (
-    <footer className="bg-[#F6F6F5] text-[#1B1F23]  ">
-      <div className="container flex gap-8 md:gap-[140px] px-[40px] py-24 ">
+    <footer className="bg-[#F6F6F5] text-[#1B1F23]">
+      <div className="container flex flex-col md:flex-row  md:justify-between px-[40px] py-18">
         {/* Newsletter */}
         <div className="md:w-1/4 flex flex-col gap-8">
           <div className='flex flex-col gap-4'>
@@ -40,25 +59,38 @@ export function Footer({
           </div>
 
           {/* Newsletter Form - Add action/method as needed */}
-          <form className="flex w-full">
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              className="flex-grow px-[20px] border bg-white border-[#DDDDDD] rounded-l-md focus:outline-none text-black placeholder:text-black/80 text-sm"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-[#1B1F23] text-white text-sm px-6 py-[13px] rounded-r-md hover:bg-gray-700"
-            >
-              Subscribe
-            </button>
-          </form>
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex w-full">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                className="flex-grow px-[20px] border bg-white border-[#DDDDDD] rounded-l-md focus:outline-none text-black placeholder:text-black/80 text-sm"
+                value={emailValue}
+                onChange={(e) => {
+                  setEmailValue(e.target.value);
+                  setEmailSent(false);
+                }}
+                required
+              />
+              <button
+                type="button"
+                className="bg-[#1B1F23] text-white text-sm px-6 py-[13px] rounded-r-md hover:bg-gray-700"
+                onClick={handleSubscribeClick}
+              >
+                Subscribe
+              </button>
+            </div>
+            {emailSent && (
+              <p className="text-sm text-green-600 mt-1">Successfully sent!</p>
+            )}
+          </div>
         </div>
-        {/* Store Info */}
-        <div className="flex flex-col md:flex-row w-auto gap-6">
-        {/* Link Columns */}
+
+        {/* Store Info Sections - Now handle accordions internally */}
+        {/* This container stacks columns on mobile and rows them on desktop */}
+        <div className="flex flex-col mt-6 md:mt-0 md:flex-row w-full md:w-fit md:gap-[40px]">
+          {/* Removed the intermediate div. Place all columns directly here. */}
           <FooterLinkColumn
             title="About Us"
             links={[
@@ -68,6 +100,9 @@ export function Footer({
               {title: 'Delivery', url: '/pages/delivery'},
             ]}
           />
+          {/* Mobile Separator */}
+          <div className="block md:hidden mx-auto w-full bg-[#DDDDDD]/50 h-[1px] my-3"></div>
+
           <FooterLinkColumn
             title="Support"
             links={[
@@ -77,6 +112,9 @@ export function Footer({
               {title: 'Returns', url: '/policies/refund-policy'},
             ]}
           />
+          {/* Mobile Separator */}
+          <div className="block md:hidden mx-auto w-full bg-[#DDDDDD]/50 h-[1px] my-3"></div>
+
           <FooterLinkColumn
             title="Important Link"
             links={[
@@ -86,79 +124,38 @@ export function Footer({
               {title: 'Setup', url: '/pages/setup'},
             ]}
           />
+          {/* Mobile Separator */}
+          <div className="block md:hidden mx-auto w-full bg-[#DDDDDD]/50 h-[1px] my-3"></div>
+
           <FooterLinkColumn
             title="Legal"
             links={[
               {title: 'Privacy Policy', url: '/policies/privacy-policy'},
+              {title: 'Accessibility', url: '/pages/accessibility'},
               {
-                title: 'Accessibility',
-                url: '/pages/accessibility',
+                title: 'Terms of Service',
+                url: '/policies/terms-of-service',
               },
-              {title: 'Terms of Service', url: '/policies/terms-of-service'},
               {
                 title: 'Affiliate Program',
                 url: '/pages/affiliate-program',
               },
               {title: 'Articles', url: '/blogs/articles'},
             ]}
-            />
+          />
+          {/* NO separator after the last link column */}
+
+          {/* Separator before Contact Us (Mobile Only) */}
+          <div className="block md:hidden mx-auto w-full bg-[#DDDDDD]/50 h-[1px] my-3"></div>
+          
         </div>
+        {/* Contact Us Column (Always Visible) */}
+        <FooterContactColumn />
 
-        {/* Contact Us */}
-        <div className="text-sm flex flex-col gap-[34px]">
-          <div className='flex flex-col gap-6'>
-            <h3 className="text-lg font-medium text-[#1B1F23]">
-              Contact Us
-            </h3>
-            <div className='flex flex-col gap-2'>
-              <p className="text-[#1B1F23]/80 text-base">Let Us Help You</p>
-              <a href="tel:8888600572" className="text-2xl font-bold text-[#1B1F23] hover:text-gray-600">
-                (888) 860-0572
-              </a>
-            </div>
-          </div>
-
-
-          <div className="flex flex-col gap-6">
-            <h4 className="text-lg font-medium text-[#1B1F23] ">
-              Connect With Us
-            </h4>
-            <div className="flex space-x-4 items-center">
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="text-black hover:text-gray-900"
-              >
-                <InstagramIcon />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="text-black hover:text-gray-900"
-              >
-                <TwitterIcon />
-              </a>
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="text-black hover:text-gray-900"
-              >
-                <FacebookIcon />
-              </a>
-              <a
-                href="#"
-                aria-label="YouTube"
-                className="text-black hover:text-gray-900"
-              >
-                <YoutubeIcon />
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="flex flex-row justify-between px-[40px] py-3 border-t border-b border-black/10 text-center text-base text-[#1B1F23]/50">
+      <div className="flex flex-col-reverse  md:flex-row md:justify-between px-[40px] py-3 border-t border-b border-black/10 text-center text-base text-[#1B1F23]/50">
         <p>
           © uncmfrt.com. All right reserved.
         </p>
@@ -173,7 +170,7 @@ export function Footer({
   );
 }
 
-// Helper component for link columns
+// Modified FooterLinkColumn for animation and styling
 function FooterLinkColumn({
   title,
   links,
@@ -181,16 +178,46 @@ function FooterLinkColumn({
   title: string;
   links: {title: string; url: string}[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="text-sm flex flex-col gap-6">
-      <h3 className="text-lg font-medium flex-shrink-0">{title}</h3>
-      <ul className="gap-[14px] flex flex-col flex-grow text-[16px]">
-        {links.map((link) => (
-          <li key={link.title}>
-            <FooterLink item={link} />
-          </li>
-        ))}
-      </ul>
+    <div className="text-sm flex flex-col w-full md:w-fit h-fit">
+      {/* Accordion Trigger (Mobile Only) - Consistent styling */}
+      <button
+        type="button"
+        className="md:hidden flex justify-between items-center w-full py-3 font-medium text-base md:text-lg"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls={`link-column-content-${title.replace(/\s+/g, '-')}`}
+      >
+        <span>{title}</span>
+        {isOpen ? (
+          <MinusIcon className="w-5 h-5" />
+        ) : (
+          <PlusIcon className="w-5 h-5" />
+        )}
+      </button>
+
+      {/* Title (Desktop Only) */}
+      <h3 className="hidden md:block text-lg font-medium flex-shrink-0 mb-6">
+        {title}
+      </h3>
+
+      {/* Content List with Animation */}
+      <div
+        id={`link-column-content-${title.replace(/\s+/g, '-')}`}
+        className={`overflow-hidden md:overflow-visible transition-[max-height] duration-300 ease-in-out ${isOpen ? 'max-h-96' : 'max-h-0'} md:max-h-none`}
+      >
+        <ul
+          className={`flex flex-col gap-[14px] text-sm md:text-base md:pt-0 ${isOpen ? 'pt-3' : ''}`}
+        >
+          {links.map((link) => (
+            <li key={link.title}>
+              <FooterLink item={link} />
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
