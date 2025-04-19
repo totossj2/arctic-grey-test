@@ -83,31 +83,47 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   const productDescription = featuredProduct.description ?? 'No description available.';
 
   return (
-    <section className="py-16 lg:py-24 bg-[#F6F6F5]">
+    <section className="py-8 lg:py-24 bg-[#F6F6F5]">
       <div className="container mx-auto px-4 text-center">
         <p className="text-sm text-gray-500 mb-1 tracking-wide">Simple & Effective Ingredients</p>
-        <h2 className="text-3xl md:text-4xl font-bold mb-10 md:mb-16 min-h-[48px] flex items-center justify-center">
+        <h2 className="text-2xl md:text-4xl font-bold mb-8 md:mb-16 min-h-[48px] flex items-center justify-center">
           {productTitle}
         </h2>
-        <div className='flex flex-row items-center justify-around '>
+        <div className='flex flex-row items-center justify-around'>
           {totalProducts > 1 && (
             <button
               aria-label="Previous Item"
               onClick={handlePrev}
-              className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
+              className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
             >
               <ArrowLeftIcon />
             </button>
           )}
-          <div className="relative bg-white rounded-[8px] w-[85%] ">
-            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-              <div className="w-full lg:w-[43%] flex justify-center lg:justify-end">
-                <div className="max-w-md w-full">
+          <div className="relative bg-white rounded-[8px] w-[80%] md:w-[85%] mx-auto">
+            <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
+              <div className="w-full lg:w-[43%] flex justify-center lg:justify-end px-4 pt-4 lg:px-0 lg:pt-0">
+                <div className="max-w-md w-full relative">
+                  <div className="flex md:hidden bg-black absolute bottom-0 text-white text-center just w-full py-1 px-1 rounded-lg">
+                    <div className="flex flex-row justify-around items-center w-full">
+                      {blendTags.length > 0 ? (
+                        blendTags.map((tag, index) => (
+                          <span key={index}  className="text-[10px]  text-center">{tag}</span>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-400 italic w-full"></p>
+                      )}
+                      {[...Array(Math.max(0, 3 - blendTags.length))].map((_, i) => (
+                        <div key={`placeholder-${i}`} className="hidden md:flex flex-col items-center text-center px-2 opacity-50 w-1/3 min-h-[60px]">
+                          <p className="text-sm font-medium mt-1">Feature</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   {featuredProduct.images?.nodes?.[0] ? (
                     <Image
                       key={featuredProduct.id}
                       data={featuredProduct.images.nodes[0]}
-                      sizes="(max-width: 1024px) 90vw, 40vw"
+                      sizes="(max-width: 1024px) 80vw, 40vw"
                       className="w-full h-auto object-contain rounded transition-opacity duration-300 ease-in-out"
                     />
                   ) : (
@@ -118,38 +134,53 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 </div>
               </div>
               <div className="w-full lg:w-full text-left flex flex-col">
-                <div className="bg-[#1B1F23] text-white text-center w-full py-8 px-14 gap-6 flex flex-col rounded-t-lg">
-                  <h3 className="text-2xl font-medium">The Blend</h3>
-                  <div className="flex justify-around items-start min-h-[60px]">
+                <div className="bg-[#1B1F23] text-white text-center w-full py-6 px-4 md:px-14 md:py-8 gap-4 md:gap-6 hidden md:flex flex-col rounded-t-lg">
+                  <h3 className="text-xl md:text-2xl font-medium">The Blend</h3>
+                  <div className="flex flex-col md:flex-row justify-around items-center md:items-start min-h-[60px] gap-4 md:gap-0">
                     {blendTags.length > 0 ? (
                       blendTags.map((tag, index) => (
-                        <div key={index} className="flex flex-row items-center text-center px-2 w-1/3 ">
-                          <div className="flex items-center justify-center p-3 bg-[#252A2F] rounded-full mr-2 flex-shrink-0">
+                        <div key={index} className="flex flex-row items-center text-center px-2 w-full md:w-1/3">
+                          <div className="flex items-center justify-center p-2 md:p-3 bg-[#252A2F] rounded-full mr-2 flex-shrink-0">
                             <LeafIcon />
                           </div>
-                          <p className="text-lg line-clamp-2 text-left">{tag}</p>
+                          <p className="text-base md:text-lg line-clamp-2 text-left">{tag}</p>
                         </div>
                       ))
                     ) : (
                       <p className="text-sm text-gray-400 italic w-full">No features listed.</p>
                     )}
                     {[...Array(Math.max(0, 3 - blendTags.length))].map((_, i) => (
-                      <div key={`placeholder-${i}`} className="flex flex-col items-center text-center px-2 opacity-50 w-1/3 min-h-[60px]">
+                      <div key={`placeholder-${i}`} className="hidden md:flex flex-col items-center text-center px-2 opacity-50 w-1/3 min-h-[60px]">
                         <p className="text-sm font-medium mt-1">Feature</p>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="px-14 py-8 flex gap-8 flex-col items-center flex-grow bg-white rounded-b-lg ">
-                  <h4 className="text-lg font-medium text-center">Active Ingredients</h4>
-                  <div className="grid grid-cols-3 gap-4 md:gap-6 text-left w-full ">
+                <div className="px-2 py-3 md:px-14 md:py-8 flex gap-6 md:gap-8 flex-col items-center flex-grow bg-white rounded-b-lg ">
+                  <h4 className="text-base md:text-lg font-medium text-center">Active Ingredients</h4>
+                  {/* Desktop view for active ingredients */}
+                  <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6 text-left w-full">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex flex-col items-start gap-3 h-[180px]">
-                        <div className="flex items-center justify-center w-fit h-fit p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
+                      <div key={i} className="flex flex-col items-start gap-2">
+                        <div className="flex items-center justify-center w-fit h-fit p-2 md:p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
                           <LeafIcon fill='#1B1F23' />
                         </div>
-                        <h5 className="font-medium text-[16px]">{productTitle}</h5>
-                        <p className="text-sm text-[#1B1F23]/60 leading-snug line-clamp-3 overflow-hidden">
+                        <h5 className="font-medium text-sm md:text-[16px]">{productTitle}</h5>
+                        <p className="text-xs md:text-sm text-[#1B1F23]/60 leading-snug line-clamp-3 overflow-hidden">
+                          {productDescription}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Mobile view for active ingredients - changed to horizontal scroll */}
+                  <div className="flex md:hidden overflow-x-auto gap-4 w-full pb-4 scrollbar-hide">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex flex-col items-center gap-2 w-5/6 flex-shrink-0 px-1 h-[150px]">
+                        <div className="flex items-center justify-center w-fit h-fit p-2 md:p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
+                          <LeafIcon fill='#1B1F23' />
+                        </div>
+                        <h5 className="font-medium text-sm md:text-[16px]">{productTitle}</h5>
+                        <p className="text-xs md:text-sm text-[#1B1F23]/60 leading-snug line-clamp-3 overflow-hidden whitespace-normal">
                           {productDescription}
                         </p>
                       </div>
@@ -158,7 +189,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                   <Link
                       key={featuredProduct.id}
                       to={`/products/${featuredProduct.handle}`}
-                      className="inline-block bg-[#1B1F23] w-full mt-auto text-white py-3 px-10 text-center rounded-md hover:bg-gray-700 transition text-[16px] duration-300 font-medium shadow-md"
+                      className="inline-block bg-[#1B1F23] w-full mt-auto text-white py-2.5 px-6 md:py-3 md:px-10 text-center rounded-md hover:bg-gray-700 transition text-sm md:text-[16px] duration-300 font-medium shadow-md"
                   >
                       Customize This Blend
                   </Link>
@@ -170,7 +201,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             <button
               aria-label="Next Item"
               onClick={handleNext}
-              className={`p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
+              className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors hover:bg-gray-200 cursor-pointer`}
             >
               <ArrowRightIcon />
             </button>
