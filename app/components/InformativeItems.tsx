@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Link } from '@remix-run/react';
+import { useSwipeable } from 'react-swipeable';
 
 const itemsData = [
   {
@@ -103,6 +104,14 @@ const itemsData = [
 
 const InformativeItems = () => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => setActiveIndex((prevIndex) => (prevIndex + 1) % itemsData.length),
+    onSwipedRight: () => setActiveIndex((prevIndex) => (prevIndex - 1 + itemsData.length) % itemsData.length),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -138,14 +147,52 @@ const InformativeItems = () => {
           <p className="text-base text-[#1B1F23] ">
             <span role="img" aria-label="thinking face" >🧐</span> Why Health & Fitness
           </p>
-          <h2 className="mt-2 text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="mt-2 text-2xl md:text-[40px] leading-[40px] font-medium tracking-tight text-gray-900 sm:text-4xl">
             Clean Supplements -<br /> Made For You
           </h2>
         </div>
 
+        {/* Mobile Carousel */}
+        <div {...handlers} className="block lg:hidden overflow-hidden relative ">
+          {/* Render only the active card */}
+          {itemsData.map((item, index) => (
+            <div
+              key={item.id}
+              className={`transition-transform duration-300 ease-in-out ${index === activeIndex ? 'block' : 'hidden'}`}
+            >
+              <Link
+                to={item.url}
+                className="informative-card relative block h-[208px] text-start p-2 bg-white rounded-lg cursor-pointer overflow-hidden group transition-shadow duration-300"
+              >
+                {/* No border glow needed for swipe */}
+                {/* Card Content */}
+                <div className="relative z-10">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mb-4">
+                    {item.svgPlaceholder}
+                  </div>
+                  <h3 className="text-lg leading-6 font-medium text-[#1B1F23]">{item.title}</h3>
+                  <p className="mt-2 text-base leading-[24px] text-[#1B1F23]/80">{item.description}</p>
+                </div>
+              </Link>
+            </div>
+          ))}
+        <div className="mt-4 mx-auto w-fit flex space-x-2">
+          {itemsData.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={`h-2 w-2 rounded-full ${index === activeIndex ? 'bg-gray-800' : 'bg-gray-400'}`}
+              aria-label={`Go to item ${index + 1}`}
+            />
+          ))}
+        </div>
+        </div>
+
+
+        {/* Desktop Grid */}
         <div
           ref={gridRef}
-          className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 gap-x-[32px]"
+          className="hidden lg:grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 gap-x-[32px]"
          >
           {itemsData.map((item) => (
             <Link
@@ -157,7 +204,7 @@ const InformativeItems = () => {
               <div
                  className="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                  style={{
-                   background: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(0, 0, 0, 0.08), transparent 80%)`,
+                   background: `radial-gradient(150px circle at var(--mouse-x) var(--mouse-y), rgba(0, 0, 0, 0.08), transparent 30%)`,
                  }}
                  aria-hidden="true"
                />
