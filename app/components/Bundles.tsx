@@ -1,6 +1,5 @@
-// RecommendedProducts.tsx
-import { Suspense, useState, useRef, useEffect } from 'react';
-import { Await, useFetcher } from '@remix-run/react';
+// Bundles.tsx - Displays categorized product bundles in a carousel
+import { useState, useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { ProductCard, PRODUCT_CARD_FRAGMENT, ProductNode } from './ProductCard';
 import type { CollectionProductsQuery } from 'storefrontapi.generated';
@@ -18,12 +17,8 @@ const ArrowRightIcon = () => (
     </svg>
 );
 
-interface Props {
-    initialCollection: CollectionProductsQuery['collection'] | null;
-}
-
-// Mapeo de categorías a IDs de colección (Añade los IDs que faltan si los tienes)
-const categoryCollectionIds: { [key: string]: string } = {
+// Mapeo de categorías a IDs de colección
+export const categoryCollectionIds: { [key: string]: string } = {
     'Sleep': 'gid://shopify/Collection/509335437588',
     'Cognitive Function': 'gid://shopify/Collection/509335503124',
     'Foundational Health': 'gid://shopify/Collection/509335535892',
@@ -32,7 +27,7 @@ const categoryCollectionIds: { [key: string]: string } = {
 };
 
 // Definir las categorías que tienen un ID asociado
-const availableCategories = Object.keys(categoryCollectionIds);
+export const availableCategories = Object.keys(categoryCollectionIds);
 
 // --- Responsive Settings ---
 // Define breakpoints and corresponding items per page and gap based on Tailwind defaults
@@ -44,146 +39,87 @@ const responsiveSettings = [
 ];
 // --- End Responsive Settings ---
 
-export default function Bundles({ initialCollection }: Props) {
-    const fetcher = useFetcher<CollectionProductsQuery>();
+// Nueva interfaz para las props
+interface Props {
+    allCollectionsData: Record<string, CollectionProductsQuery['collection'] | null>;
+}
+
+export default function Bundles({ allCollectionsData }: Props) {
     const [selectedCategory, setSelectedCategory] = useState(availableCategories[0] || 'Sleep');
     const [startIndex, setStartIndex] = useState(0);
     const carouselContainerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState<number | null>(null);
-    // --- State for responsive settings ---
-    const [itemsPerPage, setItemsPerPage] = useState(responsiveSettings[responsiveSettings.length - 1].items); // Default to largest
+    const [itemsPerPage, setItemsPerPage] = useState(responsiveSettings[responsiveSettings.length - 1].items);
     const [gapPx, setGapPx] = useState(responsiveSettings[responsiveSettings.length - 1].gap);
-    // --- End State for responsive settings ---
-
-    // Efecto para iniciar la carga de datos
-    useEffect(() => {
-        console.log(`[Bundles Effect] Category changed to: ${selectedCategory}`); // Log category change
-        const isInitialCategory = selectedCategory === availableCategories[0];
-
-        // If it's the initial category and we already have the initial server-loaded data, don't fetch.
-        if (isInitialCategory && initialCollection) {
-            console.log('[Bundles Effect] Initial category with initial data, skipping fetch.'); // Log skip reason
-            return;
-        }
-
-        const collectionId = categoryCollectionIds[selectedCategory];
-        console.log(`[Bundles Effect] Target Collection ID: ${collectionId}`); // Log target ID
-
-        if (collectionId) {
-            console.log(`[Bundles Effect] Fetcher state: ${fetcher.state}`); // Log fetcher state
-            console.log(`[Bundles Effect] Fetcher data present: ${!!fetcher.data}`); // Log if fetcher has data
-            if (fetcher.data) {
-                console.log(`[Bundles Effect] Fetcher data collection ID: ${(fetcher.data.collection as any)?.id}`); // Log ID in fetcher data if present
-            }
-
-            // Check if we need to load data
-            const shouldLoad = fetcher.state === 'idle' && (!fetcher.data || (fetcher.data.collection as any)?.id !== collectionId);
-
-            console.log(`[Bundles Effect] Should load new data: ${shouldLoad}`); // Log decision
-
-            if (shouldLoad) {
-                console.log(`[Bundles Effect] Loading data for collection: ${collectionId}`); // Log loading action
-                fetcher.load(`/api/collection-products?collectionId=${collectionId}`);
-            } else {
-                console.log('[Bundles Effect] Skipping fetch based on current state/data.'); // Log skip reason
-            }
-        } else {
-             console.log('[Bundles Effect] No Collection ID found for selected category.'); // Log missing ID
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedCategory, initialCollection]); // Depende solo de la categoría y datos iniciales
 
     const handleCategoryClick = (category: string) => {
         if (category !== selectedCategory) {
             setSelectedCategory(category);
-            setStartIndex(0);
+            setStartIndex(0); // Reset index on category change
         }
     };
 
-    // Hook para ResizeObserver y actualizar itemsPerPage/gapPx
+    // Hook para ResizeObserver (lógica interna simplificada respecto a productos)
     useEffect(() => {
         const el = carouselContainerRef.current;
         if (!el) return;
 
         const updateLayoutSettings = (width: number) => {
           setContainerWidth(width);
-          // Find the correct settings based on width
-          let currentSettings = responsiveSettings[0]; // Default to smallest breakpoint setting
+          let currentSettings = responsiveSettings[0];
           for (let i = responsiveSettings.length - 1; i >= 0; i--) {
             if (width >= responsiveSettings[i].breakpoint) {
               currentSettings = responsiveSettings[i];
               break;
             }
           }
-          // Set state based on the determined settings
           setItemsPerPage(currentSettings.items);
           setGapPx(currentSettings.gap);
 
-          // Reset startIndex if it becomes invalid with new itemsPerPage
-          // Ensure startIndex does not exceed the maximum possible value
-          const currentProducts = getCurrentProducts(); // Helper function to get products
+          // Recalcular max index basado en la categoría actual
+          const currentProducts = allCollectionsData[selectedCategory]?.products?.nodes || [];
           const maxPossibleIndex = Math.max(0, currentProducts.length - itemsPerPage);
-            if (startIndex > maxPossibleIndex) {
-                 setStartIndex(maxPossibleIndex); // Adjust startIndex if out of bounds
-            }
+          if (startIndex > maxPossibleIndex) {
+            setStartIndex(maxPossibleIndex);
+          }
         };
-
 
         const ro = new ResizeObserver(([entry]) => {
              updateLayoutSettings(entry.contentRect.width);
         });
 
         ro.observe(el);
-        // Initial calculation
         updateLayoutSettings(el.offsetWidth);
 
         return () => ro.disconnect();
+    // Dependencias simplificadas: solo recalcular en cambio de categoría o itemsPerPage
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [startIndex]); // Add startIndex to deps to recalculate max index if needed
+    }, [selectedCategory, itemsPerPage]);
 
-    // Determinar qué categoría está seleccionada para lógica de datos
-    const isInitialCategorySelected = selectedCategory === availableCategories[0];
-
-    // --- Helper to get current products consistently ---
-    const getCurrentProducts = (): ProductNode[] => {
-        let currentCollectionData: CollectionProductsQuery['collection'] | null | undefined = null;
-
-        if (isInitialCategorySelected && initialCollection) {
-            currentCollectionData = initialCollection;
-        } else if (fetcher.data?.collection) {
-            // Ensure we don't overwrite initial data if fetcher completes for initial category
-            if (!isInitialCategorySelected || !initialCollection) {
-                 currentCollectionData = fetcher.data.collection;
-            }
-        }
-        // Fallback if fetcher is loading or no data yet, but we have initial
-        if (!currentCollectionData && isInitialCategorySelected && initialCollection) {
-             currentCollectionData = initialCollection;
-        }
-        return (currentCollectionData?.products?.nodes || []) as ProductNode[];
+    // --- Obtener productos, título y handle de la categoría seleccionada --- 
+    const currentCollection = allCollectionsData[selectedCategory];
+    const productsToShow: ProductNode[] = (currentCollection?.products?.nodes || []) as ProductNode[];
+    
+    // Guarda de tipo más específica para title y handle
+    let collectionTitle = selectedCategory; // Default
+    let collectionHandle = 'all'; // Default
+    if (currentCollection && 'title' in currentCollection && 'handle' in currentCollection) {
+        collectionTitle = currentCollection.title;
+        collectionHandle = currentCollection.handle;
     }
-    // --- End Helper ---
-
-
-    // Usamos 'as any' temporalmente para evitar error de linter.
-    const productsToShow: ProductNode[] = getCurrentProducts();
-    // Determinar título y handle basados en los datos actuales
-    const currentDataForMeta = isInitialCategorySelected && initialCollection ? initialCollection : fetcher.data?.collection;
-    const collectionTitle = (currentDataForMeta as any)?.title ?? "Bundles";
-    const collectionHandle = (currentDataForMeta as any)?.handle ?? 'all';
-
+    // --- Fin obtención de datos --- 
 
     const handlePrev = () => {
         setStartIndex(i => Math.max(0, i - itemsPerPage));
-        };
-        
-        const handleNext = () => {
-        const maxIndex = Math.max(0, productsToShow.length - itemsPerPage);
-        setStartIndex(i => Math.min(i + itemsPerPage, maxIndex));
-        };
+    };
+    
+    const handleNext = () => {
+      const maxIndex = Math.max(0, productsToShow.length - itemsPerPage);
+      setStartIndex(i => Math.min(i + itemsPerPage, maxIndex));
+    };
       
     const canPrev = startIndex > 0;
-    const canNext = startIndex < productsToShow.length - itemsPerPage; // Use state itemsPerPage
+    const canNext = startIndex < productsToShow.length - itemsPerPage;
 
     // --- Swipe Handlers ---
     const swipeHandlers = useSwipeable({
@@ -194,40 +130,38 @@ export default function Bundles({ initialCollection }: Props) {
     });
     // --- End Swipe Handlers ---
 
-    const itemW = containerWidth !== null && itemsPerPage > 0 // Check itemsPerPage > 0
-        ? (containerWidth - (itemsPerPage - 1) * gapPx) / itemsPerPage // Use state gapPx & itemsPerPage
+    const itemW = containerWidth !== null && itemsPerPage > 0
+        ? (containerWidth - (itemsPerPage - 1) * gapPx) / itemsPerPage
         : 0;
-    const tx = containerWidth !== null && itemW > 0 // Check itemW > 0 to avoid NaN/Infinity issues
-        ? startIndex * (itemW + gapPx) // Use state gapPx
+    const tx = containerWidth !== null && itemW > 0
+        ? startIndex * (itemW + gapPx)
         : 0;
 
     // Renderizar el componente
     return (
-        <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-white"> {/* Adjusted padding */}
-            <div className="max-w-screen"> {/* Consider max-w-7xl or similar if needed */}
+        <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-white">
+            <div className="max-w-screen">
                 {/* Header y botones de categoría */}
-                {/* Use flex-col on small screens, flex-row on larger screens */}
                 <div className="flex flex-col lg:flex-row items-center justify-between mb-8 w-full gap-6 lg:gap-0">
                     {/* Title section */}
-                    <div className="flex flex-row justify-between items-center gap-4 lg:gap-8 w-full lg:w-auto"> {/* Adjusted gap */}
+                    <div className="flex flex-row justify-between items-center gap-4 lg:gap-8 w-full lg:w-auto">
                         <div className="text-start">
-                           <p className="text-sm md:text-base text-[#1B1F23]"> {/* Adjusted text size */}
+                           <p className="text-sm md:text-base text-[#1B1F23]">
                                <span role="img" aria-label="thinking face" className="mr-1">📦</span> Goals Specific
                            </p>
-                           <h2 className="mt-1 md:mt-2 text-3xl md:text-[40px] leading-tight md:leading-[40px] font-medium tracking-tight text-gray-900"> {/* Adjusted text size/leading */}
+                           <h2 className="mt-1 md:mt-2 text-3xl md:text-[40px] leading-tight md:leading-[40px] font-medium tracking-tight text-gray-900">
                                Bundles
                            </h2>
                         </div>
                         <a href={`/collections/${collectionHandle}`} className="block md:hidden text-base md:text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline">View All Bundles</a>
-
                     </div>
 
-                     {/* Category buttons - wrap on smaller screens */}
-                     <div className='flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 md:gap-x-8 lg:gap-x-12 text-[#1B1F23] text-[14px] flex-grow lg:flex-grow-0 lg:pl-8'> {/* Added wrap and gap */}
+                     {/* Category buttons */}
+                     <div className='flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 md:gap-x-8 lg:gap-x-12 text-[#1B1F23] text-[14px] flex-grow lg:flex-grow-0 lg:pl-8'>
                         {availableCategories.map((category) => (
                             <li
                                 key={category}
-                                className={`list-none cursor-pointer whitespace-nowrap ${selectedCategory === category ? 'underline underline-offset-8 md:underline-offset-10 decoration-1' : ''}`} // Adjusted offset
+                                className={`list-none cursor-pointer whitespace-nowrap ${selectedCategory === category ? 'underline underline-offset-8 md:underline-offset-10 decoration-1' : ''}`}
                                 onClick={() => handleCategoryClick(category)}
                             >
                                 {category}
@@ -235,23 +169,22 @@ export default function Bundles({ initialCollection }: Props) {
                         ))}
                     </div>
 
-                    {/* Navigation section - stack on small screens */}
+                    {/* Navigation section */}
                     <div className="flex  flex-row-reverse md:flex-row items-center justify-between md:justify-center sm:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">
                         <div className="text-center order-2 sm:order-1">
-                             {/* Adjusted text size */}
                             <a href={`/collections/${collectionHandle}`} className="hidden md:block text-base md:text-[18px] text-[#1B1F23] hover:text-[#1B1F23]/50 underline">View All Bundles</a>
                         </div>
-                         {/* Buttons */}
-                        <div className="flex flex-row items-center gap-3 order-1 sm:order-2"> {/* Adjusted gap */}
+                         {/* Buttons - fetcher.state eliminado de disabled */}
+                        <div className="flex flex-row items-center gap-3 order-1 sm:order-2">
                             <button
-                                className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`} // Adjusted padding
-                                onClick={handlePrev} disabled={!canPrev || fetcher.state === 'loading'} aria-label="Previous products"
+                                className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canPrev ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                                onClick={handlePrev} disabled={!canPrev} aria-label="Previous products"
                             >
                                 <ArrowLeftIcon />
                             </button>
                             <button
-                                className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`} // Adjusted padding
-                                onClick={handleNext} disabled={!canNext || fetcher.state === 'loading'} aria-label="Next products"
+                                className={`p-2 md:p-3 rounded-[4px] border border-[#1B1F23]/10 bg-[#f5f5f5] transition-colors ${!canNext ? 'opacity-50 cursor-default' : 'hover:bg-gray-200 cursor-pointer'}`}
+                                onClick={handleNext} disabled={!canNext} aria-label="Next products"
                             >
                                 <ArrowRightIcon />
                             </button>
@@ -259,32 +192,28 @@ export default function Bundles({ initialCollection }: Props) {
                     </div>
                 </div>
 
-                {/* Contenedor del carrusel con minHeight fijo */}
+                {/* Contenedor del carrusel */}
                 <div
                     ref={carouselContainerRef}
                     className="overflow-hidden w-full relative"
-                    style={{ minHeight: '450px' }} // Adjusted minHeight slightly if needed
+                    style={{ minHeight: '450px' }}
                 >
-                    {/* Use transition for smooth transform */}
                     <div
                         {...swipeHandlers}
                         className="flex transition-transform duration-300 ease-in-out cursor-grab active:cursor-grabbing"
-                        style={{
-                            gap: `${gapPx}px`, // Use state gapPx
-                            transform: `translateX(-${tx}px)`, // Use state tx
-                        }}
+                        style={{ gap: `${gapPx}px`, transform: `translateX(-${tx}px)` }}
                     >
-                         {containerWidth !== null && itemW > 0 && productsToShow.length > 0 ? ( // Check itemW > 0
+                         {containerWidth !== null && itemW > 0 && productsToShow.length > 0 ? (
                             productsToShow.map((product) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}
-                                    style={{ width: `${itemW}px`, flexShrink: 0 }} // Use state itemW
+                                    style={{ width: `${itemW}px`, flexShrink: 0 }}
                                     version='bundle'
                                 />
                             ))
                         ) : (
-                             fetcher.state !== 'loading' && <div className="text-center py-10 w-full">No products found in {collectionTitle}.</div>
+                            <div className="text-center py-10 w-full">No products found in {collectionTitle}.</div>
                         )}
                     </div>
                 </div>

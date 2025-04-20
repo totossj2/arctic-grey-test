@@ -12,7 +12,7 @@ import Goals from '~/components/Goals';
 import RecommendedProducts from '~/components/RecommendedProducts';
 import InformativeItems from '~/components/InformativeItems';
 import VideoCarousel from '~/components/VideoCarousel';
-import Bundles from '~/components/Bundles';
+import Bundles, { categoryCollectionIds, availableCategories } from '~/components/Bundles';
 import FeaturedProducts from '~/components/FeaturedProducts';
 import Video from '~/components/Video';
 import Blogs from '~/components/Blogs';
@@ -22,9 +22,9 @@ export const meta: MetaFunction = () => {
   return [{ title: 'UNCMFRT | Home - Arctic Grey Assesment' }];
 };
 
-const BUNDLES_COLLECTION_QUERY = `#graphql
+const BUNDLE_COLLECTION_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
-  query BundlesCollection(
+  query BundleCollection(
     $id: ID!
     $country: CountryCode
     $language: LanguageCode
@@ -46,33 +46,43 @@ const BUNDLES_COLLECTION_QUERY = `#graphql
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
 
-  const recommendedCollectionData = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
-    variables: {
-      id: "gid://shopify/Collection/509271015700"
-    },
+  const recommendedCollectionPromise = storefront.query(COLLECTION_PRODUCTS_QUERY, {
+    variables: { id: "gid://shopify/Collection/509271015700" },
   });
 
-  const bundlesInitialData = await storefront.query(BUNDLES_COLLECTION_QUERY, {
-    variables: {
-      id: "gid://shopify/Collection/509335437588"
-    },
+  const featuredProductsPromise = storefront.query(COLLECTION_PRODUCTS_QUERY, {
+    variables: { id: "gid://shopify/Collection/509341991188" },
   });
 
-  const featuredProducts = await storefront.query(COLLECTION_PRODUCTS_QUERY, {
-    variables: {
-      id: "gid://shopify/Collection/509341991188"
-    },
+  const bundleCollectionPromises = availableCategories.map(category => {
+    const collectionId = categoryCollectionIds[category];
+    return storefront.query<{ collection: CollectionProductsQuery['collection'] | null }>(BUNDLE_COLLECTION_QUERY, {
+      variables: { id: collectionId },
+    }).then(result => ({ category, data: result.collection }));
+  });
+
+  const [recommendedCollectionData, featuredProductsData, allBundlesResults] = await Promise.all([
+    recommendedCollectionPromise,
+    featuredProductsPromise,
+    Promise.all(bundleCollectionPromises),
+  ]);
+
+  const allBundlesData: Record<string, CollectionProductsQuery['collection'] | null> = {};
+  allBundlesResults.forEach((result: { category: string; data: CollectionProductsQuery['collection'] | null }) => {
+    if (result.data) {
+      allBundlesData[result.category] = result.data;
+    }
   });
 
   return json({
     recommendedCollection: recommendedCollectionData,
-    bundlesInitialCollection: bundlesInitialData,
-    featuredProducts: featuredProducts,
+    allBundlesData: allBundlesData,
+    featuredProducts: featuredProductsData,
   });
 }
 
 export default function Homepage() {
-  const { recommendedCollection, bundlesInitialCollection, featuredProducts } = useLoaderData<typeof loader>();
+  const { recommendedCollection, allBundlesData, featuredProducts } = useLoaderData<typeof loader>();
 
   const videos = [
     {
@@ -126,7 +136,7 @@ export default function Homepage() {
       <RecommendedProducts products={recommendedCollection} />
       <InformativeItems />
       <VideoCarousel videos={videos} />
-      <Bundles initialCollection={bundlesInitialCollection?.collection ?? null} />
+      <Bundles allCollectionsData={allBundlesData} />
       <FeaturedProducts products={featuredProducts}/>
       <Video />
       <Blogs />

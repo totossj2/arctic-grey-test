@@ -1,27 +1,67 @@
 import { type LoaderFunctionArgs, json } from '@shopify/remix-oxygen';
-import { PRODUCT_CARD_FRAGMENT } from '~/components/ProductCard'; // Asumiendo que ProductCard está en esta ruta
+import { PRODUCT_CARD_FRAGMENT } from '~/components/ProductCard';
 
-// Reutilizamos la consulta definida, asegurándonos que PRODUCT_CARD_FRAGMENT esté disponible.
-// Si PRODUCT_CARD_FRAGMENT no es exportado desde ProductCard, necesitarás copiar su definición aquí o importarla correctamente.
-export const COLLECTION_PRODUCTS_QUERY_API = `#graphql
+// --- Consultas GraphQL Específicas por Categoría ---
+const SLEEP_PRODUCTS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
-  query CollectionProductsApi(
-    $id: ID!
+  query SleepProducts(
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    collection(id: $id) {
-      id
-      title
-      handle
-      products(first: 8) {
-        nodes {
-          ...ProductCard
-        }
-      }
+    collection(id: "gid://shopify/Collection/509335437588") {
+      id title handle products(first: 8) { nodes { ...ProductCard } }
     }
   }
 ` as const;
+
+const COGNITIVE_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query CognitiveProducts(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(id: "gid://shopify/Collection/509335503124") {
+      id title handle products(first: 8) { nodes { ...ProductCard } }
+    }
+  }
+` as const;
+
+const FOUNDATIONAL_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query FoundationalProducts(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(id: "gid://shopify/Collection/509335535892") {
+      id title handle products(first: 8) { nodes { ...ProductCard } }
+    }
+  }
+` as const;
+
+const ATHLETIC_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query AthleticProducts(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(id: "gid://shopify/Collection/509340090644") {
+      id title handle products(first: 8) { nodes { ...ProductCard } }
+    }
+  }
+` as const;
+
+const HORMONE_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query HormoneProducts(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(id: "gid://shopify/Collection/509340123412") {
+      id title handle products(first: 8) { nodes { ...ProductCard } }
+    }
+  }
+` as const;
+// --- Fin Consultas Específicas ---
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { storefront } = context;
@@ -38,43 +78,58 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     return json({ error: 'Collection ID is required' }, { status: 400 });
   }
 
+  // Seleccionar la consulta basada en el collectionId
+  let query;
+  switch (collectionId) {
+    case 'gid://shopify/Collection/509335437588':
+      query = SLEEP_PRODUCTS_QUERY;
+      break;
+    case 'gid://shopify/Collection/509335503124':
+      query = COGNITIVE_PRODUCTS_QUERY;
+      break;
+    case 'gid://shopify/Collection/509335535892':
+      query = FOUNDATIONAL_PRODUCTS_QUERY;
+      break;
+    case 'gid://shopify/Collection/509340090644':
+      query = ATHLETIC_PRODUCTS_QUERY;
+      break;
+    case 'gid://shopify/Collection/509340123412':
+      query = HORMONE_PRODUCTS_QUERY;
+      break;
+    default:
+      console.error(`[API Loader] Unknown or unsupported collectionId: ${collectionId}`);
+      return json({ error: 'Unknown or unsupported Collection ID' }, { status: 400 });
+  }
+
   try {
-    const data = await storefront.query(COLLECTION_PRODUCTS_QUERY_API, {
+    // Ejecutar la consulta seleccionada (sin pasar ID en variables)
+    const data = await storefront.query(query, {
       variables: {
-        id: collectionId,
-        // country: storefront.i18n.country, // Descomenta si necesitas localización
-        // language: storefront.i18n.language, // Descomenta si necesitas localización
+        // country: storefront.i18n.country,
+        // language: storefront.i18n.language,
       },
-      // Intenta deshabilitar el caché de Oxygen/Storefront para esta consulta específica
-      cache: storefront.CacheNone(),
+      cache: storefront.CacheNone(), // Mantener anti-cache por si acaso
     });
 
     console.log('[API Loader] Data received from Storefront API:', JSON.stringify(data)); // Log data received
 
-    if (!data.collection) {
-      console.log('[API Loader] No collection found for this ID.');
-      // Añadir cabeceras anti-cache
-      const headers = new Headers({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      });
-      return json({ collection: null }, { status: 200, headers });
-    }
-
-    console.log(`[API Loader] Returning collection title: ${data.collection.title}`); // Log title being returned
-
-    // Añadir cabeceras anti-cache a la respuesta exitosa también
+    // Preparar cabeceras anti-cache
     const headers = new Headers({
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
     });
+
+    if (!data.collection) {
+       return json({ collection: null }, { status: 200, headers });
+    }
+
+    console.log(`[API Loader] Returning collection title: ${data.collection.title}`); // Log title being returned
+
     return json(data, { headers });
 
   } catch (error) {
     console.error(`[API Loader] Error fetching collection products for ID ${collectionId}:`, error);
-    // Añadir cabeceras anti-cache también en caso de error
     const headers = new Headers({
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
