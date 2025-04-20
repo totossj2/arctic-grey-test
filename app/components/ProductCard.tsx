@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import type { CurrencyCode } from '@shopify/hydrogen/storefront-api-types';
+import { AddToCartButton } from './AddToCartButton';
+import {useAside} from './Aside';
+
 
 // Define and export the fragment
 export const PRODUCT_CARD_FRAGMENT = `#graphql
@@ -24,6 +27,12 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
         url
         width
         height
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
       }
     }
   }
@@ -58,6 +67,12 @@ export interface ProductNode {
       height?: number | null;
     }>;
   };
+  variants: {
+    nodes: Array<{
+      id: string;
+      availableForSale: boolean;
+    }>;
+  };
 }
 
 interface ProductCardProps {
@@ -69,21 +84,51 @@ interface ProductCardProps {
 
 export function ProductCard({ product, style, version = 'default', className }: ProductCardProps) {
   const description = product.description || "High-quality supplement.";
+  const firstVariant = product.variants?.nodes?.[0];
+  const availableForSale = firstVariant?.availableForSale;
+  const merchandiseId = firstVariant?.id;
+  const { open } = useAside();
+  const [isHovered, setIsHovered] = useState(false);
+  const [purchaseOption, setPurchaseOption] = useState<'one-time' | 'subscribe'>('one-time');
+
+  const oneTimePrice = product.priceRange.minVariantPrice;
+  // Calculate discounted price (e.g., 10% off) - adjust logic as needed
+  const subscribePriceAmount = parseFloat(oneTimePrice.amount) * 0.90;
+  const subscribePrice = {
+    ...oneTimePrice,
+    amount: subscribePriceAmount.toFixed(2),
+  };
+
+  const selectedPrice = purchaseOption === 'one-time' ? oneTimePrice : subscribePrice;
+
+  const handleAddToCart = () => {
+    if (!merchandiseId) return;
+    // TODO: If purchaseOption is 'subscribe', you might need to pass a sellingPlanId
+    // along with the merchandiseId in the 'lines' array.
+    console.log(`Adding to cart: ${merchandiseId}, Option: ${purchaseOption}, Price: ${selectedPrice.amount}`);
+
+    open('cart');
+  };
+
+  const handleOptionChange = (option: 'one-time' | 'subscribe') => {
+    setPurchaseOption(option);
+  };
 
   return (
     <div
-      className={`rounded-lg flex flex-col p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-white'} ${className || ''}`}
+      className={`rounded-lg flex flex-col p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-white'} ${className || ''} transition-all duration-300 ease-in-out group/card`}
       style={style}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/products/${product.handle}`} className="block group mb-4">
         <div className="aspect-square overflow-hidden relative">
           {product.images?.nodes?.[0] && (
-
             <Image
               data={product.images.nodes[0]}
               aspectRatio="1/1"
               sizes="(min-width: 45em) 20vw, 50vw"
-              className="w-full h-full object-contain transition-transform duration-300"
+              className="w-full h-full object-contain transition-transform duration-300 group-hover/card:scale-105"
               draggable={false}
               onDragStart={(e) => e.preventDefault()}
             />
@@ -138,9 +183,30 @@ export function ProductCard({ product, style, version = 'default', className }: 
           ))}
         </div>
         {product.priceRange?.minVariantPrice && (
-          <button className="bg-[#1B1F23] text-white text-[13px] py-[5px] px-[15px] rounded-[4px] hover:bg-gray-700 transition duration-200">
-            Add • <Money data={product.priceRange.minVariantPrice} as="span" />
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="bg-[#1B1F23] text-white gap-1 text-[13px] py-[5px] px-[15px] flex flex-row rounded-[4px] hover:bg-gray-700 transition duration-200">
+              <AddToCartButton
+                disabled={!availableForSale || !merchandiseId}
+                onClick={handleAddToCart}
+                lines={
+                  merchandiseId
+                    ? [
+                        {
+                          merchandiseId: merchandiseId,
+                          quantity: 1,
+                        },
+                      ]
+                    : []
+                }
+              >
+                <span className='flex flex-row gap-1'>
+                  {availableForSale ? 'Add' : 'Sold out'} • <Money data={product.priceRange.minVariantPrice} as="span" className="text-[13px]" />
+                </span>
+              </AddToCartButton>
+
+            </span>
+
+          </div>
         )}
       </div>
     </div >
