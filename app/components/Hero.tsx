@@ -65,7 +65,7 @@ export function Hero({
   scrollingItems = defaultScrollingItems,
 }: HeroProps) {
   return (
-    <div id='Hero' className="relative h-[75vh] md:min-h-screen bg-gray-900 px-10">
+    <div id='Hero' className="relative h-[75vh] md:min-h-screen bg-gray-900 px-4 md:px-10">
       {/* Video Background */}
       <video 
         autoPlay 
@@ -79,7 +79,7 @@ export function Hero({
 
       {/* Hero Content */}
       <div className="relative flex items-center justify-start h-screen">
-        <div className="md:max-w-[60%] absolute  md:bottom-40 left-0">
+        <div className="max-w-[30ch] md:max-w-[60%] absolute md:bottom-40 left-0">
           <span className="text-white text-2xl md:text-9xl lg:text-[70px] font-bold max-w-3xl leading-tight tracking-tight">
             {title}
           </span>

@@ -141,7 +141,7 @@ const InformativeItems = () => {
   }, []); // Empty dependency array means this effect runs once on mount
 
   return (
-    <div className="bg-white py-16 px-[40px] sm:px-6 lg:px-[40px]">
+    <div className="bg-white py-16 px-4 md:px-[40px] sm:px-6 lg:px-[40px]">
       <div className="max-w-screen mx-auto">
         <div className="text-start mb-12">
           <p className="text-base text-[#1B1F23] ">

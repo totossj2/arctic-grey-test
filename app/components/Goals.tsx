@@ -37,7 +37,7 @@ const Goals = () => {
   ];
 
   return (
-    <section className="py-16 px-[40px]">
+    <section id='goals' className="py-16 px-4 md:px-[40px]">
       <div className="text-center mb-12">
         <p className="uppercase text-[16px] tracking-wide text-black">COMFORTABLY UNCOMFORTABLE</p>
         <h2 className="text-[28px] md:text-[40px] font-medium mt-3 text-[#1B1F23]">Start with your Goals</h2>
@@ -50,7 +50,7 @@ const Goals = () => {
       <div className="grid grid-cols-1 h-fit md:grid-cols-2 lg:grid-cols-5 gap-[20px]">
         {goals.map((goal, index) => (
           <div key={goal.id} className="flex flex-col">
-            <div className="mb-[24px] rounded-[8px] relative overflow-hidden max-h-48 md:max-h-none">
+            <div className="md:mb-[24px] rounded-[8px] relative overflow-hidden max-h-48 md:max-h-none">
               <Image
                 src={goal.imageSrc}
                 alt={goal.title}

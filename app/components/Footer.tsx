@@ -45,7 +45,7 @@ export function Footer({
 
   return (
     <footer className="bg-[#F6F6F5] text-[#1B1F23]">
-      <div className="container flex flex-col md:flex-row  md:justify-between px-[40px] py-18">
+      <div className="container flex flex-col md:flex-row  md:justify-between px-4 md:px-[40px] py-18">
         {/* Newsletter */}
         <div className="md:w-1/4 flex flex-col gap-8">
           <div className='flex flex-col gap-4'>
@@ -155,12 +155,12 @@ export function Footer({
       </div>
 
       {/* Bottom Bar */}
-      <div className="flex flex-col-reverse  md:flex-row md:justify-between px-[40px] py-3 border-t border-b border-black/10 text-center text-base text-[#1B1F23]/50">
+      <div className="flex flex-col-reverse  md:flex-row md:justify-between px-4 md:px-[40px] py-3 border-t border-b border-black/10 text-center text-base text-[#1B1F23]/50">
         <p>
           © uncmfrt.com. All right reserved.
         </p>
         <Link to='https://arcticgrey.com/'>
-          <p className=" text-[#1B1F23] flex flex-row items-center font-light gap-1">
+          <p className=" text-[#1B1F23] md:flex md:flex-row md:items-center font-light gap-1">
             Made with <HeartIcon className="inline" /> and{' '}
             <CoffeeIcon className="inline" /> by Lorenzo from Arctic Grey
           </p>
