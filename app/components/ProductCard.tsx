@@ -101,6 +101,19 @@ export function ProductCard({ product, style, version = 'default', className }: 
 
   const selectedPrice = purchaseOption === 'one-time' ? oneTimePrice : subscribePrice;
 
+  // Reconstruct a selectedVariant object for optimistic cart
+  const reconstructedVariant = firstVariant ? {
+    id: firstVariant.id,
+    availableForSale: firstVariant.availableForSale,
+    price: selectedPrice, // Use the price corresponding to the purchase option
+    product: {
+      handle: product.handle,
+      title: product.title,
+    },
+    // Add other necessary fields if AddToCartButton expects them
+    // e.g., image, selectedOptions, etc. Might need adjustments to FRAGMENT
+  } : undefined;
+
   const handleAddToCart = () => {
     if (!merchandiseId) return;
     // TODO: If purchaseOption is 'subscribe', you might need to pass a sellingPlanId
@@ -185,25 +198,33 @@ export function ProductCard({ product, style, version = 'default', className }: 
         {product.priceRange?.minVariantPrice && (
           <div className="flex items-center gap-2">
             <span className="bg-[#1B1F23] text-white gap-1 text-[13px] py-[5px] px-[15px] flex flex-row rounded-[4px] hover:bg-gray-700 transition duration-200">
-              <AddToCartButton
-                disabled={!availableForSale || !merchandiseId}
-                onClick={handleAddToCart}
-                lines={
-                  merchandiseId
-                    ? [
-                        {
-                          merchandiseId: merchandiseId,
-                          quantity: 1,
-                        },
-                      ]
-                    : []
-                }
-              >
-                <span className='flex flex-row gap-1'>
-                  {availableForSale ? 'Add' : 'Sold out'} • <Money data={product.priceRange.minVariantPrice} as="span" className="text-[13px]" />
-                </span>
-              </AddToCartButton>
-
+              {firstVariant && reconstructedVariant && (
+                <AddToCartButton
+                  disabled={!availableForSale || !merchandiseId}
+                  onClick={handleAddToCart}
+                  lines={
+                    merchandiseId
+                      ? [
+                          {
+                            merchandiseId: merchandiseId,
+                            quantity: 1,
+                            selectedVariant: reconstructedVariant,
+                          },
+                        ]
+                      : []
+                  }
+                >
+                  {availableForSale ? (
+                    <span className="w-full bg-[#1B1F23] text-white py-3 px-4 rounded-md hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center font-semibold block">
+                      Add to Cart - <Money data={selectedPrice} as="span" />
+                    </span>
+                  ) : (
+                    <span className="w-full bg-gray-400 text-white py-3 px-4 rounded-md text-center font-semibold block cursor-not-allowed">
+                      Sold out
+                    </span>
+                  )}
+                </AddToCartButton>
+              )}
             </span>
 
           </div>
