@@ -28,6 +28,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const collectionId = url.searchParams.get('collectionId');
 
+  console.log(`[API Loader] Request for collectionId: ${collectionId}`); // Log incoming request ID
+
   if (url.searchParams.get('clear') === 'true') {
     return json({ collection: null });
   }
@@ -43,16 +45,41 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         // country: storefront.i18n.country, // Descomenta si necesitas localización
         // language: storefront.i18n.language, // Descomenta si necesitas localización
       },
+      // Intenta deshabilitar el caché de Oxygen/Storefront para esta consulta específica
+      cache: storefront.CacheNone(),
     });
 
+    console.log('[API Loader] Data received from Storefront API:', JSON.stringify(data)); // Log data received
+
     if (!data.collection) {
-      return json({ collection: null }, { status: 200 });
+      console.log('[API Loader] No collection found for this ID.');
+      // Añadir cabeceras anti-cache
+      const headers = new Headers({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      });
+      return json({ collection: null }, { status: 200, headers });
     }
 
-    return json(data);
+    console.log(`[API Loader] Returning collection title: ${data.collection.title}`); // Log title being returned
+
+    // Añadir cabeceras anti-cache a la respuesta exitosa también
+    const headers = new Headers({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
+    return json(data, { headers });
 
   } catch (error) {
-    console.error(`Error fetching collection products for ID ${collectionId}:`, error);
-    return json({ error: 'Failed to fetch products from Shopify API' }, { status: 500 });
+    console.error(`[API Loader] Error fetching collection products for ID ${collectionId}:`, error);
+    // Añadir cabeceras anti-cache también en caso de error
+    const headers = new Headers({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      });
+    return json({ error: 'Failed to fetch products from Shopify API' }, { status: 500, headers });
   }
 } 
