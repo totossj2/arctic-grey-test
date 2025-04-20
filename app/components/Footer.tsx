@@ -65,7 +65,7 @@ export function Footer({
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                className="flex-grow px-[20px] border bg-white border-[#DDDDDD] rounded-l-md focus:outline-none text-black placeholder:text-black/80 text-sm"
+                className="w-full px-[20px] border bg-white border-[#DDDDDD] rounded-l-md focus:outline-none text-black placeholder:text-black/80 text-xs md:text-sm"
                 value={emailValue}
                 onChange={(e) => {
                   setEmailValue(e.target.value);
@@ -75,7 +75,7 @@ export function Footer({
               />
               <button
                 type="button"
-                className="bg-[#1B1F23] text-white text-sm px-6 py-[13px] rounded-r-md hover:bg-gray-700"
+                className="bg-[#1B1F23] text-white text-xs md:text-sm px-4 md:px-6 py-[13px] rounded-r-md hover:bg-gray-700"
                 onClick={handleSubscribeClick}
               >
                 Subscribe
