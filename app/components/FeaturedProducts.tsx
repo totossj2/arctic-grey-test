@@ -86,7 +86,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
     <section className="py-8 lg:py-24 bg-[#F6F6F5]">
       <div className="container mx-auto px-4 text-center">
         <p className="text-sm text-gray-500 mb-1 tracking-wide">Simple & Effective Ingredients</p>
-        <h2 className="text-2xl md:text-4xl font-bold mb-8 md:mb-16 min-h-[48px] flex items-center justify-center">
+        <h2 className="text-2xl md:text-4xl font-bold mb-8 md:mb-12 min-h-[48px] flex items-center justify-center">
           {productTitle}
         </h2>
         <div className='flex flex-row items-center justify-around'>
@@ -100,7 +100,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             </button>
           )}
           <div className="relative bg-white rounded-[8px] w-[80%] md:w-[85%] mx-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
+            <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12 border-black/10 border-l border-b border-t rounded-lg">
               <div className="w-full lg:w-[43%] flex justify-center lg:justify-end px-4 pt-4 lg:px-0 lg:pt-0">
                 <div className="max-w-md w-full relative">
                   <div className="flex md:hidden bg-black absolute bottom-0 text-white text-center just w-full py-1 px-1 rounded-lg">
@@ -134,7 +134,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 </div>
               </div>
               <div className="w-full lg:w-full text-left flex flex-col">
-                <div className="bg-[#1B1F23] text-white text-center w-full py-6 px-4 md:px-14 md:py-8 gap-4 md:gap-6 hidden md:flex flex-col rounded-t-lg">
+                <div className="bg-[#1B1F23] text-white text-center w-full py-6 px-4 md:px-14 md:py-8 gap-4 md:gap-6 hidden md:flex flex-col rounded-tr-lg">
                   <h3 className="text-xl md:text-2xl font-medium">The Blend</h3>
                   <div className="flex flex-col md:flex-row justify-around items-center md:items-start min-h-[60px] gap-4 md:gap-0">
                     {blendTags.length > 0 ? (
@@ -156,7 +156,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                     ))}
                   </div>
                 </div>
-                <div className="px-2 py-3 md:px-14 md:py-8 flex gap-6 md:gap-8 flex-col items-center flex-grow bg-white rounded-b-lg ">
+                <div className="px-2 py-3 md:px-14 md:py-8 flex gap-6 md:gap-8 flex-col items-center flex-grow bg-white rounded-br-lg  border-r border-l border-black/10 ">
                   <h4 className="text-base md:text-lg font-medium text-center">Active Ingredients</h4>
                   {/* Desktop view for active ingredients */}
                   <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6 text-left w-full">
