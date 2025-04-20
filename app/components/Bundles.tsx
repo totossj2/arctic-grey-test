@@ -57,15 +57,38 @@ export default function Bundles({ initialCollection }: Props) {
 
     // Efecto para iniciar la carga de datos
     useEffect(() => {
+        console.log(`[Bundles Effect] Category changed to: ${selectedCategory}`); // Log category change
         const isInitialCategory = selectedCategory === availableCategories[0];
+
+        // If it's the initial category and we already have the initial server-loaded data, don't fetch.
         if (isInitialCategory && initialCollection) {
-            return; 
+            console.log('[Bundles Effect] Initial category with initial data, skipping fetch.'); // Log skip reason
+            return;
         }
+
         const collectionId = categoryCollectionIds[selectedCategory];
+        console.log(`[Bundles Effect] Target Collection ID: ${collectionId}`); // Log target ID
+
         if (collectionId) {
-            if (fetcher.state === 'idle' && (!fetcher.data || (fetcher.data.collection as any)?.id !== collectionId)) {
-                fetcher.load(`/api/collection-products?collectionId=${collectionId}`);
+            console.log(`[Bundles Effect] Fetcher state: ${fetcher.state}`); // Log fetcher state
+            console.log(`[Bundles Effect] Fetcher data present: ${!!fetcher.data}`); // Log if fetcher has data
+            if (fetcher.data) {
+                console.log(`[Bundles Effect] Fetcher data collection ID: ${(fetcher.data.collection as any)?.id}`); // Log ID in fetcher data if present
             }
+
+            // Check if we need to load data
+            const shouldLoad = fetcher.state === 'idle' && (!fetcher.data || (fetcher.data.collection as any)?.id !== collectionId);
+
+            console.log(`[Bundles Effect] Should load new data: ${shouldLoad}`); // Log decision
+
+            if (shouldLoad) {
+                console.log(`[Bundles Effect] Loading data for collection: ${collectionId}`); // Log loading action
+                fetcher.load(`/api/collection-products?collectionId=${collectionId}`);
+            } else {
+                console.log('[Bundles Effect] Skipping fetch based on current state/data.'); // Log skip reason
+            }
+        } else {
+             console.log('[Bundles Effect] No Collection ID found for selected category.'); // Log missing ID
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCategory, initialCollection]); // Depende solo de la categoría y datos iniciales
