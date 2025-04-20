@@ -40,9 +40,9 @@ const Goals = () => {
     <section className="py-16 px-[40px]">
       <div className="text-center mb-12">
         <p className="uppercase text-[16px] tracking-wide text-black">COMFORTABLY UNCOMFORTABLE</p>
-        <h2 className="text-4xl md:text-[40px] font-medium mt-3 text-[#1B1F23]">Start with your Goals</h2>
-        <p className="mt-4 max-w-xl mx-auto text-base text-[#1B1F23]/70 leading-relaxed">
-          We cannot become what we want to be by<br />
+        <h2 className="text-[28px] md:text-[40px] font-medium mt-3 text-[#1B1F23]">Start with your Goals</h2>
+        <p className="mt-4 max-w-[32ch] mx-auto text-base text-[#1B1F23]/70 leading-relaxed">
+          We cannot become what we want to be by
           remaining what we are.
         </p>
       </div>
