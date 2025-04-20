@@ -116,13 +116,13 @@ export function Testimonials({
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:justify-between md:flex-row md:items-center">
           {/* Doctor Recommendation and Reviews Section */}
-          <div className="flex flex-col mb-6 md:mb-0 md:w-fit md:pr-6">
+          <div className="flex flex-col-reverse md:flex-col mb-6 md:mb-0 md:w-fit md:pr-6">
             <div className="inline-block mb-2">
-              <div className="inline-block border border-[#000000] border-opacity-100 rounded-[8px] px-4 py-2 bg-black/10 text-[#1B1F23] font-medium text-sm">
+              <div className="inline-block border text-center mt-3 md:mt-0 w-full md:w-fit border-[#000000] border-opacity-100 rounded-[8px] px-4 py-2 bg-black/10 text-[#1B1F23] font-medium text-sm">
                 {doctorRecommended}
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex flex-row-reverse md:flex-row justify-between items-center">
               <div className="flex">
                 {Array.from({ length: starCount }).map((_, i) => (
                   <StarIcon key={i} />
@@ -132,7 +132,7 @@ export function Testimonials({
             </div>
           </div>
 
-          <div className='separator w-[1px] h-[70px] bg-[#1B1F23]/10'></div>
+          <div className= 'hidden md:block separator w-[1px] h-[70px] bg-[#1B1F23]/10'></div>
           
           {/* Logos Section with Carousel */}
           <div className="md:w-2/3 md:pl-6">
