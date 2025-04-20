@@ -35,7 +35,7 @@ const ScrollingText = ({ items }: { items: ScrollingItem[] }) => {
       <div className="inline-flex items-center gap-4 animate-scroll">
         {duplicatedItems.map((item, index) => (
           <div key={`${item.text}-${index}`} className="flex items-center gap-4">
-            <span className="text-white font-semibold tracking-wider text-[14px]">
+            <span className="text-white font-semibold tracking-wider text-xs md:text-sm">
               {item.text}
             </span>
             <StarIcon />
@@ -46,7 +46,7 @@ const ScrollingText = ({ items }: { items: ScrollingItem[] }) => {
       <div className="inline-flex items-center gap-4 animate-scroll" aria-hidden={true}>
         {duplicatedItems.map((item, index) => (
           <div key={`${item.text}-second-${index}`} className="flex items-center gap-4">
-            <span className="text-white font-semibold tracking-wider text-[14px]">
+            <span className="text-white font-semibold tracking-wider text-sm">
               {item.text}
             </span>
             <StarIcon />
@@ -65,7 +65,7 @@ export function Hero({
   scrollingItems = defaultScrollingItems,
 }: HeroProps) {
   return (
-    <div className="relative min-h-screen bg-gray-900 px-10">
+    <div id='Hero' className="relative h-[75vh] md:min-h-screen bg-gray-900 px-10">
       {/* Video Background */}
       <video 
         autoPlay 
@@ -79,14 +79,14 @@ export function Hero({
 
       {/* Hero Content */}
       <div className="relative flex items-center justify-start h-screen">
-        <div className="max-w-[60%] absolute bottom-40 left-0">
-          <span className="text-white text-4xl md:text-9xl lg:text-[70px] font-bold max-w-3xl leading-tight tracking-tight">
+        <div className="md:max-w-[60%] absolute  md:bottom-40 left-0">
+          <span className="text-white text-2xl md:text-9xl lg:text-[70px] font-bold max-w-3xl leading-tight tracking-tight">
             {title}
           </span>
           <div className="mt-8">
             <Link
               to={ctaLink}
-              className="inline-block bg-white text-black md:text-[16px] font-semibold px-8 py-3 rounded-[8px] hover:bg-gray-100 transition-colors tracking-wide"
+              className="inline-block bg-white text-black text-sm md:text-base font-semibold px-6 py-2 md:px-8 md:py-3 rounded-[8px] hover:bg-gray-100 transition-colors tracking-wide"
             >
               {ctaText}
             </Link>
