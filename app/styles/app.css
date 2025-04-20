@@ -2,10 +2,10 @@
 @import url("tailwind.css");
 
 :root {
-  --aside-width: 400px;
-  --cart-aside-summary-height-with-discount: 300px;
+  --aside-width: 330px;
+  --cart-aside-summary-height-with-discount: 200px;
   --cart-aside-summary-height: 250px;
-  --grid-item-width: 355px;
+  --grid-item-width: 200px;
   --header-height: 64px;
   --color-dark: #000;
   --color-light: #fff;
@@ -72,6 +72,7 @@ aside header h2 {
 
 aside main {
   margin: 1rem;
+  overflow-x: hidden;
 }
 
 aside p {
@@ -85,7 +86,9 @@ aside p:last-child {
 aside li {
   margin-bottom: 0.125rem;
 }
-
+.overlay.expanded {
+  z-index: 100000;
+}
 .overlay {
   background: rgba(0, 0, 0, 0.2);
   bottom: 0;

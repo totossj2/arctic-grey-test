@@ -1,4 +1,4 @@
-import {Await, Link} from '@remix-run/react';
+import {Await, Link, NavLink} from '@remix-run/react';
 import {Suspense, useId} from 'react';
 import type {
   CartApiQueryFragment,
@@ -7,13 +7,14 @@ import type {
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
-import {Header, HeaderMenu} from '~/components/Header';
+import {Header} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {useAside} from '~/components/Aside';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -36,7 +37,7 @@ export function PageLayout({
     <Aside.Provider>
       <CartAside cart={cart} />
       <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} isLoggedIn={isLoggedIn} />
       {header && (
         <Header
           header={header}
@@ -154,20 +155,74 @@ function SearchAside() {
 function MobileMenuAside({
   header,
   publicStoreDomain,
+  isLoggedIn,
 }: {
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
+  isLoggedIn: PageLayoutProps['isLoggedIn'];
 }) {
+  const {close, open: openAside} = useAside();
+  const navigation = [
+    { name: 'Shop', href: '/shop' },
+    { name: 'Science', href: '/science' },
+    { name: 'Podcasts', href: '/podcasts' },
+    { name: 'Trainers', href: '/trainers' },
+    { name: 'Blog', href: '/blog' },
+  ];
+
+  const mobileNavLinkClass = "block py-2 text-gray-700 hover:text-black";
+  const mobileButtonClass = "block w-full text-left py-2 text-gray-700 hover:text-black";
+
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
       <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
+        <div className="flex flex-col space-y-2">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.href}
+              className={({isActive}) => `${mobileNavLinkClass} ${isActive ? 'font-semibold' : ''}`}
+            >
+              {item.name}
+            </NavLink>
+          ))}
+
+          <hr className="my-4"/>
+
+          <NavLink to="/men" className={({isActive}) => `${mobileNavLinkClass} ${isActive ? 'font-semibold' : ''}`}>
+            Men
+          </NavLink>
+          <NavLink to="/quiz" className={({isActive}) => `${mobileNavLinkClass} ${isActive ? 'font-semibold' : ''}`}>
+            Take The Quiz
+          </NavLink>
+          <NavLink to="/account" className={({isActive}) => `${mobileNavLinkClass} ${isActive ? 'font-semibold' : ''}`}>
+            <Suspense fallback={<span>Sign in</span>}>
+              <Await resolve={isLoggedIn} errorElement={<span>Sign in</span>}>
+                {(loggedIn) => <>{loggedIn ? 'Account' : 'Sign in'}</>}
+              </Await>
+            </Suspense>
+          </NavLink>
+
+          <hr className="my-4"/>
+
+          <button
+            className={mobileButtonClass}
+            onClick={() => {
+              openAside('search');
+            }}
+          >
+            Search
+          </button>
+          <button
+            className={mobileButtonClass}
+            onClick={() => {
+              openAside('cart');
+            }}
+          >
+            Cart
+          </button>
+        </div>
       </Aside>
     )
   );
