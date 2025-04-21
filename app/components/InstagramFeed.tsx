@@ -1,16 +1,16 @@
 import { Link } from '@remix-run/react';
 
 const images = [
-  '/images/instagramFeed/instagram_1.png', 
-  '/images/instagramFeed/instagram_2.png',
-  '/images/instagramFeed/instagram_3.png',
-  '/images/instagramFeed/instagram_4.png',
-  '/images/instagramFeed/instagram_5.png',
-  '/images/instagramFeed/instagram_6.png',
-  '/images/instagramFeed/instagram_7.png',
-  '/images/instagramFeed/instagram_8.png',
-  '/images/instagramFeed/instagram_9.png',
-  '/images/instagramFeed/instagram_10.png',
+  '/images/instagramFeed/instagram_1.webp', 
+  '/images/instagramFeed/instagram_2.webp',
+  '/images/instagramFeed/instagram_3.webp',
+  '/images/instagramFeed/instagram_4.webp',
+  '/images/instagramFeed/instagram_5.webp',
+  '/images/instagramFeed/instagram_6.webp',
+  '/images/instagramFeed/instagram_7.webp',
+  '/images/instagramFeed/instagram_8.webp',
+  '/images/instagramFeed/instagram_9.webp',
+  '/images/instagramFeed/instagram_10.webp',
 ];
 
 export function InstagramFeed() {

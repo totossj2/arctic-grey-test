@@ -6,7 +6,7 @@ export default function Video() {
     <section id='video' className='relative text-white px-4 sm:px-10 py-12 sm:py-20'>
       <div
         className='relative rounded-lg aspect-[4/3] sm:aspect-video bg-no-repeat bg-cover bg-center flex flex-col justify-center items-center sm:items-start text-center sm:text-left w-full overflow-hidden'
-        style={{ backgroundImage: "url('/images/videoBackground.png')" }}
+        style={{ backgroundImage: "url('/images/videoBackground.webp')" }}
       >
         <div className="absolute inset-0 bg-black/40 z-0 rounded-lg"></div>
 

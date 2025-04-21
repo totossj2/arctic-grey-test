@@ -16,12 +16,12 @@ interface MediaLogo {
 }
 
 const defaultMediaLogos: MediaLogo[] = [
-  { name: 'Rolling Stone', imageSrc: '/images/logos/rolling-stone.png', altText: 'Rolling Stone logo', width: 79, height: 18 },
-  { name: 'Men\'s Journal', imageSrc: '/images/logos/mens-journal.png', altText: 'Men\'s Journal logo', width: 52, height: 16 },
-  { name: 'LA Weekly', imageSrc: '/images/logos/la-weekly.png', altText: 'LA Weekly logo', width: 58, height: 14 },
-  { name: 'Herb', imageSrc: '/images/logos/herb.png', altText: 'Herb logo', width: 37, height: 12 },
-  { name: 'New York Times', imageSrc: '/images/logos/nyt.png', altText: 'The New York Times logo', width: 81, height: 11 },
-  { name: 'BBC News', imageSrc: '/images/logos/bbc.png', altText: 'BBC News logo', width: 28, height: 18 },
+  { name: 'Rolling Stone', imageSrc: '/images/logos/rolling-stone.webp', altText: 'Rolling Stone logo', width: 79, height: 18 },
+  { name: 'Men\'s Journal', imageSrc: '/images/logos/mens-journal.webp', altText: 'Men\'s Journal logo', width: 52, height: 16 },
+  { name: 'LA Weekly', imageSrc: '/images/logos/la-weekly.webp', altText: 'LA Weekly logo', width: 58, height: 14 },
+  { name: 'Herb', imageSrc: '/images/logos/herb.webp', altText: 'Herb logo', width: 37, height: 12 },
+  { name: 'New York Times', imageSrc: '/images/logos/nyt.webp', altText: 'The New York Times logo', width: 81, height: 11 },
+  { name: 'BBC News', imageSrc: '/images/logos/bbc.webp', altText: 'BBC News logo', width: 28, height: 18 },
 ];
 
 const StarIcon = () => (

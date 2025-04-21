@@ -91,7 +91,7 @@ export default function Homepage() {
       productLink: '/products/product-1',
       title: 'Magnesium L-Threonate',
       price: '$49.95',
-      productImage: '/images/videoSlider/magnesium_mini.png',
+      productImage: '/images/videoSlider/magnesium_mini.webp',
 
     },
     {
@@ -100,7 +100,7 @@ export default function Homepage() {
       productLink: '/products/product-2',
       title: 'Magnesium L-Threonate',
       price: '$49.95',
-      productImage: '/images/videoSlider/magnesium_mini.png',
+      productImage: '/images/videoSlider/magnesium_mini.webp',
     },
     {
       id: '3',
@@ -108,7 +108,7 @@ export default function Homepage() {
       productLink: '/products/product-3',
       title: 'Magnesium L-Threonate',
       price: '$49.95',
-      productImage: '/images/videoSlider/magnesium_mini.png',
+      productImage: '/images/videoSlider/magnesium_mini.webp',
     },
     {
       id: '4',
@@ -116,7 +116,7 @@ export default function Homepage() {
       productLink: '/products/product-4',
       title: 'Magnesium L-Threonate',
       price: '$49.95',
-      productImage: '/images/videoSlider/magnesium_mini.png',
+      productImage: '/images/videoSlider/magnesium_mini.webp',
     },
     {
       id: '5',
@@ -124,7 +124,7 @@ export default function Homepage() {
       productLink: '/products/product-5',
       title: 'Magnesium L-Threonate',
       price: '$49.95',
-      productImage: '/images/videoSlider/magnesium_mini.png',
+      productImage: '/images/videoSlider/magnesium_mini.webp',
     },
   ];
 

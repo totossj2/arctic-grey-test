@@ -66,7 +66,7 @@ const ArticleCard: React.FC<ArticleProps> = ({ imageUrl, category, title, author
 export default function Blogs() {
     const articles = [
         {
-            imageUrl: '/images/blogs/blogs_1.jpg',
+            imageUrl: '/images/blogs/blogs_1.webp',
             category: 'Balanced Diet',
             url: '/blogs/Foundational-Supplements:-Build-a-Better-You',
             title: 'Foundational Supplements: Build a Better You',
@@ -75,7 +75,7 @@ export default function Blogs() {
             isLarge: true,
         },
         {
-            imageUrl: '/images/blogs/blogs_2.jpg',
+            imageUrl: '/images/blogs/blogs_2.webp',
             category: 'Balanced Diet',
             url: '/blogs/Taming-the-Fire-Within-Everything-You-Need-to-Know-About-Inflammation',
             title: 'Taming the Fire Within: Everything You Need to Know About Inflammation',
@@ -83,7 +83,7 @@ export default function Blogs() {
             date: 'August 31, 2023',
         },
         {
-            imageUrl: '/images/blogs/blogs_3.jpg',
+            imageUrl: '/images/blogs/blogs_3.webp',
             category: 'Balanced Diet',
             url: '/blogs/Optimize-Your-Sleep-with-These-15-Strategies',
             title: 'Optimize Your Sleep with These 15 Strategies',
