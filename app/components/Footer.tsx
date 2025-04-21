@@ -44,8 +44,8 @@ export function Footer({
   };
 
   return (
-    <footer className="bg-[#F6F6F5] text-[#1B1F23]">
-      <div className="container flex flex-col md:flex-row  md:justify-between px-4 md:px-[40px] py-18">
+    <footer id='footer' className="bg-[#F6F6F5] text-[#1B1F23]">
+      <div className=" flex flex-col md:flex-row w-full flex-grow md:justify-between px-4 md:px-[40px] py-18">
         {/* Newsletter */}
         <div className="md:w-1/4 flex flex-col gap-8">
           <div className='flex flex-col gap-4'>
