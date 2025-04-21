@@ -215,11 +215,11 @@ export function ProductCard({ product, style, version = 'default', className }: 
                   }
                 >
                   {availableForSale ? (
-                    <span className="w-full bg-[#1B1F23] text-white py-3 px-4 rounded-md hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center font-semibold block">
-                      Add to Cart - <Money data={selectedPrice} as="span" />
+                    <span className="w-full bg-[#1B1F23] text-white  text-[13px] rounded-sm hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center  block">
+                      Add • <Money data={selectedPrice} as="span" />
                     </span>
                   ) : (
-                    <span className="w-full bg-gray-400 text-white py-3 px-4 rounded-md text-center font-semibold block cursor-not-allowed">
+                    <span className="w-full bg-gray-400 text-white  text-[13px] rounded-sm text-center block cursor-not-allowed">
                       Sold out
                     </span>
                   )}
