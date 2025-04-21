@@ -6,8 +6,11 @@ import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {type SelectedOption} from '@shopify/hydrogen/storefront-api-types';
 
-type CartLine = OptimisticCartLine<CartApiQueryFragment>;
+type CartLine = OptimisticCartLine<
+  CartApiQueryFragment['lines']['nodes'][0]
+>;
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -22,8 +25,11 @@ export function CartLineItem({
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
-  const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const {close} = useAside();
+
+  if (!line?.id) return null;
+
+  const lineItemUrl = `/products/${product.handle}`;
 
   return (
     <li key={id} className="cart-line">
@@ -54,7 +60,7 @@ export function CartLineItem({
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
         <ul>
-          {selectedOptions.map((option) => (
+          {selectedOptions.map((option: SelectedOption) => (
             <li key={option.name}>
               <small>
                 {option.name}: {option.value}

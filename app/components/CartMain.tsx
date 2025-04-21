@@ -19,7 +19,8 @@ export type CartMainProps = {
 export function CartMain({layout, cart: originalCart}: CartMainProps) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
-  const cart = useOptimisticCart(originalCart);
+  // const cart = useOptimisticCart(originalCart); // <--- Comentado temporalmente
+  const cart = originalCart; // <--- Usar originalCart directamente
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
