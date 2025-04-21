@@ -106,6 +106,19 @@ const AsideContext = createContext<AsideContextValue | null>(null);
 Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
   const [type, setType] = useState<AsideType>('closed');
 
+  useEffect(() => {
+    if (type !== 'closed') {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    // Cleanup function to remove the class if the component unmounts
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [type]); // Re-run effect when type changes
+
   return (
     <AsideContext.Provider
       value={{
