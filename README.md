@@ -11,8 +11,8 @@ This project is an implementation for the Arctic Grey technical test, developed 
 
 1.  **Clone the repository:**
     ```bash
-    git clone <REPOSITORY-URL>
-    cd arcticgrey-test
+    git clone https://github.com/totossj2/arctic-grey-test
+    cd arctic-grey-test
     ```
 
 2.  **Install dependencies:**
@@ -20,15 +20,6 @@ This project is an implementation for the Arctic Grey technical test, developed 
     npm install
     ```
 
-3.  **Configure environment variables:**
-    Create a `.env` file in the project root based on `.env.example` (if it exists) or add the following required variables for the Shopify Storefront API:
-    ```env
-    # Add necessary environment variables here, for example:
-    PUBLIC_STOREFRONT_API_TOKEN=<Your Storefront API token>
-    PUBLIC_STOREFRONT_DOMAIN=<Your Shopify domain, e.g., 'your-store.myshopify.com'>
-    # ... other variables if needed
-    ```
-    *Note: Ensure you obtain the correct credentials from the Shopify Storefront API.*
 
 ## Running in Development
 
