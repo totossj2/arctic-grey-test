@@ -58,15 +58,20 @@ export function PageLayout({
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
-        <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
-        </Await>
-      </Suspense>
-    </Aside>
+    <Suspense fallback={<Aside type="cart" heading="Your Bag" />}>
+      <Await resolve={cart}>
+        {(cart) => {
+          const itemCount = cart?.totalQuantity || 0;
+          return (
+            <Aside type="cart" heading="Your Bag" count={itemCount}>
+              <Suspense fallback={<p>Cargando carrito...</p>}>
+                <CartMain cart={cart} layout="aside" />
+              </Suspense>
+            </Aside>
+          );
+        }}
+      </Await>
+    </Suspense>
   );
 }
 

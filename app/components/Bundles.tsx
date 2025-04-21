@@ -104,10 +104,9 @@ export default function Bundles({ allCollectionsData }: Props) {
     let collectionTitle = selectedCategory; // Default
     let collectionHandle = 'all'; // Default
     if (currentCollection && 'title' in currentCollection && 'handle' in currentCollection) {
-        collectionTitle = currentCollection.title;
-        collectionHandle = currentCollection.handle;
+        collectionTitle = currentCollection.title as string;
+        collectionHandle = currentCollection.handle as string;
     }
-    // --- Fin obtención de datos --- 
 
     const handlePrev = () => {
         setStartIndex(i => Math.max(0, i - itemsPerPage));

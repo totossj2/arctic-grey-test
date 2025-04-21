@@ -43,7 +43,7 @@ export function Header({
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8 justify-center col-span-4 text-[14px]">
+        <div className="hidden md:flex items-center space-x-9 justify-center col-span-4 text-[14px]">
           {/* Add Search Button back */}
           <button
               className="text-black hover:text-gray-600 transition-colors"
@@ -59,7 +59,7 @@ export function Header({
             <Link
               key={item.name}
               to={item.href}
-              className="text-black hover:text-gray-600 transition-colors font-medium text-sm"
+              className="text-black hover:text-gray-600 transition-colors text-sm"
             >
               {item.name}
             </Link>
