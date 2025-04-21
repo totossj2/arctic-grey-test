@@ -20,7 +20,7 @@ export function FreeShippingProgressBar({
 
   if (remainingAmount === 0) {
     return (
-        <div className="my-2 h-12">
+        <div className="my-2 h-fit md:h-12">
         <p className="text-base text-center text-[#1B1F23] mb-2">
           Congratulations! You are eligible for free shipping
         </p>
@@ -43,7 +43,7 @@ export function FreeShippingProgressBar({
   }
 
   return (
-    <div className="my-2 h-12">
+    <div className="my-2 h-fit md:h-12">
       <p className="text-base text-center text-[#1B1F23] mb-2">
         You are{' '}
         <span className="font-medium">

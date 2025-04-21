@@ -129,7 +129,7 @@ export function ProductCard({ product, style, version = 'default', className }: 
 
   return (
     <div
-      className={`rounded-lg flex h-fit flex-col p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-[#F6F6F5]'} ${className || ''} transition-all duration-300 ease-in-out group/card`}
+      className={`rounded-lg flex h-fit flex-col p-2 md:p-4 ${version === 'bundle' ? 'bg-[#F6F6F5]' : 'bg-[#F6F6F5]'} ${className || ''} transition-all duration-300 ease-in-out group/card`}
       style={style}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -170,7 +170,6 @@ export function ProductCard({ product, style, version = 'default', className }: 
                 {product.priceRange?.minVariantPrice && (
                 <div className="flex justify-between items-center gap-2 w-full">
                     <Money data={selectedPrice} as="span" className='text-sm' />
-                    <span className="bg-[#1B1F23] text-white gap-1 text-[13px] py-[5px] px-[15px] flex flex-row rounded-[4px] hover:bg-gray-700 transition duration-200">
                     {firstVariant && reconstructedVariant && (
                         <AddToCartButton
                         disabled={!availableForSale || !merchandiseId}
@@ -188,8 +187,8 @@ export function ProductCard({ product, style, version = 'default', className }: 
                         }
                         >
                         {availableForSale ? (
-                            <span className="w-full bg-[#1B1F23] text-white  text-[12px] rounded-sm hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center  block">
-                            Add to Cart  +
+                            <span className="bg-[#1B1F23]  disabled:opacity-50  flex-row gap-1 hover:bg-gray-700 py-[5px] px-[7px] md:px-[15px] rounded-sm text-center text-[13px]  text-white transition duration-200 w-full">
+                            Add <span className='hidden md:block'>to Cart  +</span>
                             </span>
                         ) : (
                             <span className="w-full bg-gray-400 text-white  text-[13px] rounded-sm text-center block cursor-not-allowed">
@@ -198,7 +197,6 @@ export function ProductCard({ product, style, version = 'default', className }: 
                         )}
                         </AddToCartButton>
                     )}
-                    </span>
                 </div>
                 )}
                 </div>

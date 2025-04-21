@@ -14,7 +14,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
 
   return (
-    <div aria-labelledby="cart-summary" className="cart-summary-aside w-full flex flex-col gap-5 py-[18px] px-4">
+    <div aria-labelledby="cart-summary" className="cart-summary-aside w-full flex flex-col gap-5 py-[8px] md:py-[18px] px-2 md:px-4">
       <div className="cart-subtotal gap-[28px]">
         <div className="flex flex-col items-start w-full h-full justify-between">
           <span className='text-xl font-medium text-[#1B1F23]'>

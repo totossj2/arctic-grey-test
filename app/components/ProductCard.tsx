@@ -197,7 +197,6 @@ export function ProductCard({ product, style, version = 'default', className }: 
         </div>
         {product.priceRange?.minVariantPrice && (
           <div className="flex items-center gap-2">
-            <span className="bg-[#1B1F23] text-white gap-1 text-[13px] py-[5px] px-[15px] flex flex-row rounded-[4px] hover:bg-gray-700 transition duration-200">
               {firstVariant && reconstructedVariant && (
                 <AddToCartButton
                   disabled={!availableForSale || !merchandiseId}
@@ -215,7 +214,7 @@ export function ProductCard({ product, style, version = 'default', className }: 
                   }
                 >
                   {availableForSale ? (
-                    <span className="w-full bg-[#1B1F23] text-white  text-[13px] rounded-sm hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center  block">
+                    <span className="bg-[#1B1F23] text-white gap-1 text-[13px] py-[5px] px-[15px] flex flex-row rounded-[4px] hover:bg-gray-700 transition duration-200 w-full bg-[#1B1F23] text-white  text-[13px] rounded-sm hover:bg-gray-700 transition duration-200 disabled:opacity-50 text-center  block">
                       Add • <Money data={selectedPrice} as="span" />
                     </span>
                   ) : (
@@ -225,7 +224,6 @@ export function ProductCard({ product, style, version = 'default', className }: 
                   )}
                 </AddToCartButton>
               )}
-            </span>
 
           </div>
         )}
