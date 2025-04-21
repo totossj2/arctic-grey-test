@@ -159,7 +159,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 <div className="px-2 py-3 md:px-14 md:py-8 flex gap-6 md:gap-8 flex-col items-center flex-grow bg-white rounded-br-lg  border-r border-l border-black/10 ">
                   <h4 className="text-base md:text-lg font-medium text-center">Active Ingredients</h4>
                   {/* Desktop view for active ingredients */}
-                  <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6 text-left w-full">
+                  <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:h-[144px] md:grid-cols-3 gap-6 md:gap-6 text-left w-full">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex flex-col items-start gap-2">
                         <div className="flex items-center justify-center w-fit h-fit p-2 md:p-3 bg-[#F6F6F5] rounded-full flex-shrink-0">
