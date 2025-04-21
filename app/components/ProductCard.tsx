@@ -174,7 +174,7 @@ export function ProductCard({ product, style, version = 'default', className }: 
                 </svg>
                 {tag}
               </span>
-            ) : null
+            ) : null 
           )}
         </div>
       )}
@@ -201,6 +201,7 @@ export function ProductCard({ product, style, version = 'default', className }: 
               {firstVariant && reconstructedVariant && (
                 <AddToCartButton
                   disabled={!availableForSale || !merchandiseId}
+                  onClick={handleAddToCart}
                   lines={
                     merchandiseId
                       ? [
