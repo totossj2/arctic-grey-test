@@ -5,6 +5,7 @@
   --aside-width: 330px;
   --cart-aside-summary-height-with-discount: 200px;
   --cart-aside-summary-height: 220px;
+  --cart-aside-summary-height-mobile: 270px;
   --grid-item-width: 200px;
   --header-height: 64px;
   --color-dark: #000;
@@ -244,10 +245,16 @@ button.reset:hover:not(:has(> *)) {
 */
 .cart-main {
   height: 100%;
-  max-height: calc(100vh - var(--cart-aside-summary-height));
+  max-height: calc(100vh - var(--cart-aside-summary-height-mobile));
   overflow-y: auto;
   width: auto;
 }
+
+@media (min-width: 768px) {
+  .cart-main {
+    max-height: calc(100vh - var(--cart-aside-summary-height));
+  }
+} 
 
 .cart-main.with-discount {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
@@ -271,8 +278,14 @@ button.reset:hover:not(:has(> *)) {
 .cart-summary-aside {
   background: white;
   border-top: 1px solid #00000010;
-  bottom: 0;
+  bottom: 50px;
   position: absolute;
+}
+@media (min-width: 768px) {
+  .cart-summary-aside {
+    bottom: 0;
+  
+  }
 }
 
 .cart-line-quantity {

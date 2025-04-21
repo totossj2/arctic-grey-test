@@ -25,7 +25,7 @@ export function CartMain({layout, cart: originalCart, recommendedProducts}: Cart
 
   return (
     <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} />
+      <CartEmpty hidden={linesCount} layout={layout} recommendedProducts={recommendedProducts} />
       {/* Pasar recommendedProducts a CartWithItems */}
       {cartHasItems && cart && <CartWithItems cart={cart} layout={layout} recommendedProducts={recommendedProducts}/>}
     </div>
