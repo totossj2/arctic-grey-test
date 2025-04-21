@@ -187,7 +187,7 @@ export function ProductCard({ product, style, version = 'default', className }: 
                         }
                         >
                         {availableForSale ? (
-                            <span className="bg-[#1B1F23]  disabled:opacity-50  flex-row gap-1 hover:bg-gray-700 py-[5px] px-[7px] md:px-[15px] rounded-sm text-center text-[13px]  text-white transition duration-200 w-full">
+                            <span className="bg-[#1B1F23]  disabled:opacity-50 md:flex flex-row gap-1 hover:bg-gray-700 py-[5px] px-[7px] md:px-[15px] rounded-sm text-center text-[13px]  text-white transition duration-200 w-full">
                             Add <span className='hidden md:block'>to Cart  +</span>
                             </span>
                         ) : (

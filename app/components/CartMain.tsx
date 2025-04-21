@@ -21,13 +21,15 @@ export function CartMain({layout, cart: originalCart, recommendedProducts}: Cart
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
-  const cartHasItems = cart?.totalQuantity && cart?.totalQuantity > 0;
+  const cartHasItems = Boolean(cart?.totalQuantity);
 
   return (
     <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} recommendedProducts={recommendedProducts} />
-      {/* Pasar recommendedProducts a CartWithItems */}
-      {cartHasItems && cart && <CartWithItems cart={cart} layout={layout} recommendedProducts={recommendedProducts}/>}
+      {cartHasItems ? (
+        cart && <CartWithItems cart={cart} layout={layout} recommendedProducts={recommendedProducts} />
+      ) : (
+        <CartEmpty hidden={false} layout={layout} recommendedProducts={recommendedProducts} />
+      )}
     </div>
   );
 }
