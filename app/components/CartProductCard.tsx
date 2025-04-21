@@ -118,7 +118,6 @@ export function ProductCard({ product, style, version = 'default', className }: 
     if (!merchandiseId) return;
     // TODO: If purchaseOption is 'subscribe', you might need to pass a sellingPlanId
     // along with the merchandiseId in the 'lines' array.
-    console.log(`Adding to cart: ${merchandiseId}, Option: ${purchaseOption}, Price: ${selectedPrice.amount}`);
 
     open('cart');
   };
