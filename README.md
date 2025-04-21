@@ -20,6 +20,8 @@ This project is an implementation for the Arctic Grey technical test, developed 
     npm install
     ```
 
+3.  **Environment Variables**
+    The local environment variables are already set in the .env file. There is no need to modify it.
 
 ## Running in Development
 
@@ -51,4 +53,14 @@ This will start the application with hot-reloading and run GraphQL code generati
 
 ## Assumptions
 
-*().*
+- Header: The header has a fixed position.
+- Hero: The video is autoplayed and muted by default.
+- Post-Hero (Testimonials): Each testimonial includes a link and scrolls slowly to the left.
+- Goals (Mobile): I chose not to use a carousel or slider here, as it's a commonly overused pattern. Instead, I redesigned the layout for mobile: cards are stacked in a column with half the height compared to desktop. On mobile, the image appears as a background.
+- Trending collection: On mobile, the carousel supports swipe gestures. On desktop, it responds to next/prev buttons only.
+- Informative Cards: I explored animations for this section. On desktop, a shadow follows the mouse cursor. On mobile, the section works as a slider, with navigation dots displayed below.
+- Vertical format videos section: This feature wasn’t part of the original Figma, but I considered it necessary. On hover (desktop), the video reveals play/pause and mute/unmute controls. The main video autoplays and is muted by default. Navigation is done via swipe on mobile and by clicking or using next/prev buttons on desktop.
+- Bundles section: Each bundle corresponds to a different Shopify collection. Clicking on a navigation item switches the displayed products.
+- Featured Products: I designed this section for mobile.
+- Cart: 1. When empty, the cart displays a recommended products carousel.
+        2. Since there was no "remove" button, I implemented logic where pressing the decrease quantity button with quantity set to 1 removes the item.
