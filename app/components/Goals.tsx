@@ -9,30 +9,35 @@ const Goals = () => {
       title: 'Sleep',
       description: 'Optimize your sleep patterns.',
       imageSrc: '/images/goals/sleep.webp',
+      imageMobileSrc: '/images/goals/mobile/sleep-1.webp' ,
     },
     {
       id: 'cognitive',
       title: 'Cognitive Function',
       description: 'Enhance your brain\'s performance and connectivity',
       imageSrc: '/images/goals/cognitive_function.webp',
+      imageMobileSrc: '/images/goals/mobile/cognitive_function-1.webp',
     },
     {
       id: 'foundational',
       title: 'Foundational Health',
       description: 'Promoting healthy, natural deep sleep day to day',
       imageSrc: '/images/goals/foundational_health.webp',
+      imageMobileSrc: '/images/goals/mobile/foundational_health-1.webp',
     },
     {
       id: 'athletic',
       title: 'Athletic Performance',
       description: 'Increase your healthy tissue, muscle, and energy',
       imageSrc: '/images/goals/athletic_performance.webp',
+      imageMobileSrc:  '/images/goals/mobile/athletic_performance-1.webp',
     },
     {
       id: 'hormone',
       title: 'Hormone Support',
       description: 'Boost your mood, libido, and vitality',
       imageSrc: '/images/goals/hormone_support.webp',
+      imageMobileSrc: '/images/goals/mobile/hormone_support-1.webp',
     },
   ];
 
@@ -54,7 +59,12 @@ const Goals = () => {
               <Image
                 src={goal.imageSrc}
                 alt={goal.title}
-                className="w-full h-full object-cover object-top"
+                className="hidden md:block w-full h-full object-cover object-top"
+              />
+              <Image
+                src={goal.imageMobileSrc}
+                alt={goal.title}
+                className="md:hidden w-full h-full object-cover object-top"
               />
               <div className="flex md:hidden bg-black/50 absolute px-5 inset-0 items-center text-left justify-between">
                 <div className="flex-1 gap-[8px]">
