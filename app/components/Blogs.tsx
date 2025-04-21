@@ -106,7 +106,7 @@ export default function Blogs() {
                 </Link>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,_52fr)_minmax(0,_48fr)] gap-5 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]">
+             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,_52fr)_minmax(0,_48fr)] gap-5 min-h-[400px] sm:min-h-[500px] ">
                  <div className="h-[300px] sm:h-[400px] md:h-full">
                    {articles[0] && <ArticleCard {...articles[0]} isLarge={true} />}
                  </div>
