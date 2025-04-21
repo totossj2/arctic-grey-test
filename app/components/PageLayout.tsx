@@ -4,6 +4,7 @@ import type {
   CartApiQueryFragment,
   FooterQuery,
   HeaderQuery,
+  CollectionProductsQuery
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
@@ -22,6 +23,7 @@ interface PageLayoutProps {
   header: HeaderQuery;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  recommendedProducts?: Promise<CollectionProductsQuery | null>;
   children?: React.ReactNode;
 }
 
@@ -32,10 +34,11 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  recommendedProducts,
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
+      <CartAside cart={cart} recommendedProducts={recommendedProducts} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} isLoggedIn={isLoggedIn} />
       {header && (
@@ -56,7 +59,10 @@ export function PageLayout({
   );
 }
 
-function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+function CartAside({cart, recommendedProducts}: {
+  cart: PageLayoutProps['cart'],
+  recommendedProducts: PageLayoutProps['recommendedProducts']
+}) {
   return (
     <Suspense fallback={<Aside type="cart" heading="Your Bag" />}>
       <Await resolve={cart}>
@@ -65,7 +71,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
           return (
             <Aside type="cart" heading="Your Bag" count={itemCount}>
               <Suspense fallback={<p>Cargando carrito...</p>}>
-                <CartMain cart={cart} layout="aside" />
+                <CartMain cart={cart} layout="aside" recommendedProducts={recommendedProducts} />
               </Suspense>
             </Aside>
           );

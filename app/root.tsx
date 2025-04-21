@@ -1,5 +1,8 @@
 import {getShopAnalytics} from '@shopify/hydrogen';
-import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {
+  type LoaderFunctionArgs,
+  defer
+} from '@shopify/remix-oxygen';
 import {
   Outlet,
   useRouteError,
@@ -8,6 +11,8 @@ import {
 } from '@remix-run/react';
 import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {COLLECTION_PRODUCTS_QUERY} from '~/components/CartRecommended';
+import type {CollectionProductsQuery} from 'storefrontapi.generated';
 
 export type RootLoader = typeof loader;
 
@@ -66,7 +71,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const {storefront, env} = args.context;
 
-  return {
+  return defer({
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
@@ -82,7 +87,7 @@ export async function loader(args: LoaderFunctionArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
-  };
+  });
 }
 
 /**
@@ -122,14 +127,29 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
       },
     })
     .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
+      console.error('Error fetching footer:', error);
       return null;
     });
+
+  // Cargar productos recomendados
+  const recommendedProducts = storefront
+    .query<CollectionProductsQuery>(COLLECTION_PRODUCTS_QUERY, {
+      variables: {
+        id: 'gid://shopify/Collection/509271015700',
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
+      },
+    })
+    .catch((error) => {
+      console.error('Error fetching recommended products:', error);
+      return null;
+    });
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     footer,
+    recommendedProducts,
   };
 }
 

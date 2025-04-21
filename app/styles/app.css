@@ -4,7 +4,7 @@
 :root {
   --aside-width: 330px;
   --cart-aside-summary-height-with-discount: 200px;
-  --cart-aside-summary-height: 250px;
+  --cart-aside-summary-height: 220px;
   --grid-item-width: 200px;
   --header-height: 64px;
   --color-dark: #000;
@@ -83,7 +83,6 @@ aside header h2 {
 }
 
 aside main {
-  margin: 1rem;
   overflow-x: hidden;
 }
 
@@ -271,11 +270,9 @@ button.reset:hover:not(:has(> *)) {
 
 .cart-summary-aside {
   background: white;
-  border-top: 1px solid var(--color-dark);
+  border-top: 1px solid #00000010;
   bottom: 0;
-  padding-top: 0.75rem;
   position: absolute;
-  width: calc(var(--aside-width) - 40px);
 }
 
 .cart-line-quantity {

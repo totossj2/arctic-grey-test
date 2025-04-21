@@ -1,8 +1,18 @@
 import {type MetaFunction, useLoaderData} from '@remix-run/react';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
-import {data, type LoaderFunctionArgs, type ActionFunctionArgs, type HeadersFunction} from '@shopify/remix-oxygen';
+import {
+  defer,
+  json,
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+  type HeadersFunction,
+} from '@shopify/remix-oxygen';
 import {CartMain} from '~/components/CartMain';
+import {
+  COLLECTION_PRODUCTS_QUERY,
+} from '~/components/CartRecommended';
+import type {CollectionProductsQuery} from 'storefrontapi.generated';
 
 export const meta: MetaFunction = () => {
   return [{title: `Hydrogen | Cart`}];
@@ -82,7 +92,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     headers.set('Location', redirectTo);
   }
 
-  return data(
+  return json(
     {
       cart: cartResult,
       errors,
@@ -96,17 +106,38 @@ export async function action({request, context}: ActionFunctionArgs) {
 }
 
 export async function loader({context}: LoaderFunctionArgs) {
-  const {cart} = context;
-  return await cart.get();
+  const {cart, storefront, locale} = context;
+  const cartPromise = cart.get();
+
+  const recommendedProductsPromise = storefront.query<CollectionProductsQuery>(
+    COLLECTION_PRODUCTS_QUERY,
+    {
+      variables: {
+        id: 'gid://shopify/Collection/509271015700',
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
+      },
+    },
+  );
+
+  recommendedProductsPromise.then(data => console.log('[Loader] Recommended Products Data:', data)).catch(err => console.error('[Loader] Error fetching recommended products:', err));
+
+  return defer({
+    cart: await cartPromise,
+    recommendedProducts: recommendedProductsPromise,
+  });
 }
 
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
+  const {cart, recommendedProducts} = useLoaderData<typeof loader>();
+
+  console.log('[Cart Component] Cart Data:', cart);
+  console.log('[Cart Component] Recommended Products Promise:', recommendedProducts);
 
   return (
     <div className="cart">
       <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+      <CartMain layout="page" cart={cart} recommendedProducts={recommendedProducts} />
     </div>
   );
 }
